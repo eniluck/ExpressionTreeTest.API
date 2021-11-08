@@ -36,13 +36,13 @@ namespace ExpressionTreeTest.Tests
             var queryParams = new QueryParams() {
                 FilterParams = new List<FilterParam>()
                 {
-                    new FilterParam()
-                    {
+                    new FilterParam() {
                         FieldName = fieldName,
                         FilterType = filterType,
                         FieldValue = fieldValue
                     }
                 },
+                filterConditions = "0",
                 OrderParams = null,
                 PageNumber = 1,
                 PageSize = 10

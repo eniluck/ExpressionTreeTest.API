@@ -48,7 +48,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
                     SimCardFormatName = p_scf_result.Name
                 };
 
-            IQueryable<PhoneExtendedInformation> filteredPhones = GetFilteredPhones(PhonesJoin, query.FilterParams);
+            IQueryable<PhoneExtendedInformation> filteredPhones = GetFilteredPhones(PhonesJoin, query.FilterParams, query.filterConditions);
 
             //получаем общее количество
             var count = await filteredPhones.CountAsync();
@@ -74,16 +74,17 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
             return result;
         }
 
-        public IQueryable<PhoneExtendedInformation> GetFilteredPhones(IQueryable<PhoneExtendedInformation> phonesJoin, List<FilterParam> filterParams)
+        public IQueryable<PhoneExtendedInformation> GetFilteredPhones(IQueryable<PhoneExtendedInformation> phonesJoin, List<FilterParam> filterParams, string filterCondition)
         {
-            var predicate = GetExpression<PhoneExtendedInformation>(filterParams);
+            var predicate = GetExpression<PhoneExtendedInformation>(filterParams, filterCondition);
 
             var filteredEntities = phonesJoin.Where(predicate);
+            //filteredEntities = phonesJoin.Where(t=> ( (1==2) & (5==6) ) | (3==4) & (7==8));
 
             return filteredEntities;
         }
 
-        public static Expression<Func<T, bool>> GetExpression<T>(List<FilterParam> filterParams)
+        public Expression<Func<T, bool>> GetExpression<T>(List<FilterParam> filterParams, string filterCondition)
         {
             if (filterParams == null || filterParams.Count == 0)
                 return null;
@@ -91,11 +92,65 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
             //.Where(p => EF.Property<string>(p, filter.FieldName) == null);
             ParameterExpression param = Expression.Parameter(typeof(T), "p");
 
-            Expression exp = null;
+            /* Expression exp = null;*/
 
-            exp = GetExpression<T>(param, filterParams[0]);
+            //Expression.Or
+            //Expression.And
+
+            // Обработать список по строке filter
+            //exp = GetExpression<T>(param, filterParams[0]);
+            ReversePolishNotation rpn = new ReversePolishNotation();
+            string rpnString = rpn.GetExpression(filterCondition);
+
+            Expression exp = FormPredicate<T>(rpnString, filterParams, param);
 
             return Expression.Lambda<Func<T, bool>>(exp, param);
+        }
+
+        public Expression FormPredicate<T>(string input, List<FilterParam> filterParams, ParameterExpression param)
+        {
+            Expression result = null; //Результат
+            Stack<Expression> temp = new Stack<Expression>(); //Временный стек для решения
+
+            for (int i = 0; i < input.Length; i++) //Для каждого символа в строке
+            {
+                //Если символ - цифра, то читаем все число и записываем на вершину стека
+                if (char.IsDigit(input[i])) {
+                    string stringIndex = string.Empty;
+
+                    while (!ReversePolishNotation.IsDelimeter(input[i]) && !ReversePolishNotation.IsOperator(input[i])) //Пока не разделитель
+                    {
+                        stringIndex += input[i]; //Добавляем
+                        i++;
+                        if (i == input.Length) break;
+                    }
+
+                    Expression exp = GetExpression<T>(param, filterParams[int.Parse(stringIndex)]);
+
+                    temp.Push(exp); //Записываем в стек
+                    i--;
+                }
+                else if (ReversePolishNotation.IsOperator(input[i])) //Если символ - оператор
+                {
+                    //Берем два последних значения из стека
+                    Expression left = temp.Pop();
+                    Expression right = temp.Pop();
+
+                    switch (input[i]) //И производим над ними действие, согласно оператору
+                    {
+                        case '|':
+                            result =
+                          Expression.Or(left, right);
+                            break;
+                        case '&':
+                            result =
+                          Expression.And(left, right);
+                            break;
+                    }
+                    temp.Push(result); //Результат вычисления записываем обратно в стек
+                }
+            }
+            return temp.Peek(); //Забираем результат всех вычислений из стека и возвращаем его
         }
 
         private static Expression GetExpression<T>(ParameterExpression param, FilterParam filter)
@@ -148,5 +203,8 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
         private static MethodInfo containsMethod = typeof(string).GetMethod("Contains", new Type[] { typeof(string) });
         private static MethodInfo startsWithMethod = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
         private static MethodInfo endsWithMethod = typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) });
+
+
+        
     }
 }
