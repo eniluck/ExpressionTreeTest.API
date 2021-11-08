@@ -160,6 +160,8 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
             ConstantExpression nullConstant = Expression.Constant(null);
             ConstantExpression blankStringConstant = Expression.Constant("");
 
+            // получить тип поля и выбрать его возможные фильтры
+
             switch (filter.FilterType) {
                 case FilterType.Equals:
                     return Expression.Equal(member, filterConstant);
