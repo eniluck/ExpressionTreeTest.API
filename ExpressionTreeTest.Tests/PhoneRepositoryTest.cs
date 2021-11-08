@@ -52,5 +52,40 @@ namespace ExpressionTreeTest.Tests
 
             Assert.AreEqual(1, 2);
         }
+
+        [Test]
+        public void GetAllInformationByParams_ShouldReturnFilteredResult2()
+        {
+            var phoneRepository = new PhoneRepository(_phonesContext, null);
+
+            var queryParams = new QueryParams() {
+                FilterParams = new List<FilterParam>()
+                {
+                    new FilterParam() {
+                        FieldName = "Name",
+                        FilterType = FilterType.NotNull,
+                        FieldValue = null
+                    },
+                    new FilterParam() {
+                        FieldName = "Name",
+                        FilterType = FilterType.Contains,
+                        FieldValue = "Samsung"
+                    },
+                    new FilterParam() {
+                        FieldName = "Name",
+                        FilterType = FilterType.Contains,
+                        FieldValue = "DEXP"
+                    }
+                },
+                filterConditions = "0 & (1 | 2)",
+                OrderParams = null,
+                PageNumber = 1,
+                PageSize = 10
+            };
+
+            var result = phoneRepository.GetAllInformationByParams(queryParams).Result;
+
+            Assert.AreEqual(1, 2);
+        }
     }
 }
