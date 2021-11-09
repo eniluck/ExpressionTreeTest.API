@@ -13,7 +13,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         private static MethodInfo startsWithMethod = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
         private static MethodInfo endsWithMethod = typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) });
 
-        public static Expression<Func<T, bool>> GetPredicate<T>(List<FilterParam> filterParams, string filterCondition)
+        public Expression<Func<T, bool>> GetPredicate<T>(List<FilterParam> filterParams, string filterCondition)
         {
             if (filterParams == null || filterParams.Count == 0)
                 return null;
@@ -28,15 +28,17 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             return Expression.Lambda<Func<T, bool>>(exp, param);
         }
 
-        public static Expression GetExpression<T>(ParameterExpression param, FilterParam filter)
+        public Expression GetExpression<T>(ParameterExpression param, FilterParam filter)
         {
             MemberExpression member = Expression.Property(param, filter.FieldName);
             ConstantExpression filterConstant = Expression.Constant(filter.FieldValue);
             ConstantExpression nullConstant = Expression.Constant(null);
             ConstantExpression blankStringConstant = Expression.Constant("");
 
-            // получить тип поля и выбрать его возможные фильтры
-
+            // Проверить что данное свойство можно фильтровать данным типом 
+            if (CheckTypeByFieldType<T>(filter) == false)
+                throw new Exception("Filter type must be supported by property value.");
+            
             switch (filter.FilterType) {
                 case FilterType.Equals:
                     return Expression.Equal(member, filterConstant);
@@ -77,7 +79,41 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             return null;
         }
 
-        public string GetPropertyType<T>(string propertyName)
+
+        public bool CheckTypeByFieldType<T>(FilterParam filter)
+        {
+            var type = GetPropertyType<T>(filter.FieldName);
+            var filterType = filter.FilterType;
+
+            if (type == "System.String") 
+            {
+                return Enum.IsDefined(typeof(StringFilterType), filterType);
+                
+            }
+
+            if (type == "System.DateTime") 
+            {
+                return Enum.IsDefined(typeof(DateFilterType), filterType);
+            }
+
+            if (
+                (type == "System.Decimal") ||
+                (type == "System.Int32") ||
+                (type == "System.Int16")
+            ) 
+            {
+                return Enum.IsDefined(typeof(NumberFilterType), filterType);
+            }
+
+            return false;
+        }
+
+        public bool CheckPropertyNameIsExisted<T>(string propertyName)
+        {
+            return typeof(T).GetProperties().Any(p => p.Name == propertyName);
+        }
+
+        private string GetPropertyType<T>(string propertyName)
         {
             Type registryObjectType = typeof(T);
 

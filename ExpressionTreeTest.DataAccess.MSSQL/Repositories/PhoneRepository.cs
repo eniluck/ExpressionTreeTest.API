@@ -76,7 +76,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
 
         public IQueryable<PhoneExtendedInformation> GetFilteredPhones(IQueryable<PhoneExtendedInformation> phonesJoin, List<FilterParam> filterParams, string filterCondition)
         {
-            var predicate = ExpressionBuilder.GetPredicate<PhoneExtendedInformation>(filterParams, filterCondition);
+            var predicate = new ExpressionBuilder().GetPredicate<PhoneExtendedInformation>(filterParams, filterCondition);
 
             var filteredEntities = phonesJoin.Where(predicate);
             return filteredEntities;
