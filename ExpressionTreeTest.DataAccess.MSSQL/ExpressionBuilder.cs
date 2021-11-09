@@ -31,6 +31,8 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         public Expression GetExpression<T>(ParameterExpression param, FilterParam filter)
         {
             MemberExpression member = Expression.Property(param, filter.FieldName);
+            
+            //TODO: изменить тип константы в зависимости от типа поля
             ConstantExpression filterConstant = Expression.Constant(filter.FieldValue);
             ConstantExpression nullConstant = Expression.Constant(null);
             ConstantExpression blankStringConstant = Expression.Constant("");
@@ -79,7 +81,6 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             return null;
         }
 
-
         /// <summary>
         /// Проверить что данное свойство можно фильтровать данным типом.
         /// </summary>
@@ -93,19 +94,22 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
 
             if (type == "System.String") 
             {
-                return Enum.IsDefined(typeof(StringFilterType), filterType);
+                StringFilterType value = (StringFilterType)filterType;
+                return Enum.IsDefined(typeof(StringFilterType), value);
             }
 
             if (type == "System.DateTime") 
             {
-                return Enum.IsDefined(typeof(DateFilterType), filterType);
+                DateFilterType value = (DateFilterType)filterType;
+                return Enum.IsDefined(typeof(DateFilterType), value);
             }
 
             if ((type == "System.Decimal") ||
                 (type == "System.Int32") ||
                 (type == "System.Int16")) 
             {
-                return Enum.IsDefined(typeof(NumberFilterType), filterType);
+                NumberFilterType value = (NumberFilterType)filterType;
+                return Enum.IsDefined(typeof(NumberFilterType), value);
             }
 
             return false;
