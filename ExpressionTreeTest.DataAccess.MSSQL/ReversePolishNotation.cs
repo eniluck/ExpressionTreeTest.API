@@ -197,6 +197,8 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         {
             Expression result = null; //Результат
             Stack<Expression> temp = new Stack<Expression>(); //Временный стек для решения
+            ExpressionBuilder expressionBuilder = new ExpressionBuilder(); // TODO: DI 
+
 
             for (int i = 0; i < rpnString.Length; i++) //Для каждого символа в строке
             {
@@ -211,7 +213,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
                         if (i == rpnString.Length) break;
                     }
 
-                    Expression exp = ExpressionBuilder.GetExpression<T>(param, filterParams[int.Parse(stringIndex)]);
+                    Expression exp = expressionBuilder.GetExpression<T>(param, filterParams[int.Parse(stringIndex)]);
 
                     temp.Push(exp); //Записываем в стек
                     i--;
