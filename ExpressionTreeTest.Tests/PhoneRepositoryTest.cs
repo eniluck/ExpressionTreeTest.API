@@ -67,9 +67,9 @@ namespace ExpressionTreeTest.Tests
                         FieldValue = null
                     },
                     new FilterParam() {
-                        FieldName = "Name",
-                        FilterType = FilterType.Contains,
-                        FieldValue = "Samsung"
+                        FieldName = "ReleaseYear",
+                        FilterType = FilterType.LessThan,
+                        FieldValue = "2021"
                     },
                     new FilterParam() {
                         FieldName = "Name",

@@ -23,7 +23,7 @@ namespace ExpressionTreeTest.Tests
         [SetUp]
         public void Setup()
         {
-            ExpressionBuilder _expressionBuilder = new ExpressionBuilder();
+            _expressionBuilder = new ExpressionBuilder();
         }
 
         [Test]
@@ -57,16 +57,32 @@ namespace ExpressionTreeTest.Tests
         }
 
         [Test]
-        public void CheckTypeByFieldType_shouldReturnTrue()
+        [TestCase("StringField", FilterType.NotNull, null)]
+        [TestCase("DateField", FilterType.LessThan, "10.10.2021")]
+        public void CheckTypeByFieldType_shouldReturnTrue(string fieldName, FilterType filterType, string fieldValue)
         {
             var filterParam = new FilterParam() {
-                FieldName = "StringField",
-                FilterType = FilterType.NotNull,
-                FieldValue = null
+                FieldName = fieldName,
+                FilterType = filterType,
+                FieldValue = fieldValue
             };
             var result = _expressionBuilder.CheckTypeByFieldType<TestClass>(filterParam);
 
             Assert.IsTrue(result);
+        }
+
+        [Test]
+        [TestCase("StringField", FilterType.LessThan, "10")]
+        public void CheckTypeByFieldType_shouldReturnFalse(string fieldName, FilterType filterType, string fieldValue)
+        {
+            var filterParam = new FilterParam() {
+                FieldName = fieldName,
+                FilterType = filterType,
+                FieldValue = fieldValue
+            };
+            var result = _expressionBuilder.CheckTypeByFieldType<TestClass>(filterParam);
+
+            Assert.IsFalse(result);
         }
     }
 }
