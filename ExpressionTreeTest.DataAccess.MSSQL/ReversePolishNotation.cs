@@ -8,38 +8,126 @@ using ExpressionTreeTest.DataAccess.MSSQL.Models;
 
 namespace ExpressionTreeTest.DataAccess.MSSQL
 {
+    /// <summary>
+    /// Обратная польская запись.
+    /// </summary>
     public class ReversePolishNotation
     {
-        //Метод возвращает true, если проверяемый символ - разделитель ("пробел" или "равно")
-        public static bool IsDelimeter(char c)
+        /// <summary>
+        /// Операции с приоритетом ( наивысший = 0 ).
+        /// </summary>
+        private readonly Dictionary<char, int> _operations = new Dictionary<char, int>()
         {
-            if ((" ".IndexOf(c) != -1))
+            { '(', 0 },
+            { ')', 1 },
+            { '|', 2 },
+            { '&', 2 }
+        };
+
+        private readonly string _delimeters = " ";
+
+        /// <summary>
+        /// Является ли символ разделителем.
+        /// </summary>
+        /// <param name="c">Символ для проверки.</param>
+        /// <returns>true, если проверяемый символ - разделитель.</returns>
+        private bool IsDelimeter(char c)
+        {
+            if ((_delimeters.IndexOf(c) != -1))
                 return true;
             return false;
         }
 
-        //Метод возвращает true, если проверяемый символ - оператор
-        public static bool IsOperator(char с)
+        /// <summary>
+        /// Является ли символ оператором.
+        /// </summary>
+        /// <param name="с">Символ для проверки.</param>
+        /// <returns>true, если проверяемый символ - оператор.</returns>
+        private bool IsOperator(char op)
         {
-            if (("&|()".IndexOf(с) != -1))
+            if (_operations.ContainsKey(op))
                 return true;
             return false;
         }
 
-        //Метод возвращает приоритет оператора
-        private byte GetPriority(char s)
+        /// <summary>
+        /// Получить приоритет операций.
+        /// </summary>
+        /// <param name="op">Символ операции.</param>
+        /// <returns>Приоритет.</returns>
+        private int GetPriority(char op)
         {
-            switch (s) {
-                case '(': return 0;
-                case ')': return 1;
-                case '|': return 2;
-                case '&': return 2;
-                default: return 5;
+            if (_operations.ContainsKey(op) == false)
+                return _operations.Values.Max() + 1;
+
+            return _operations[op];
+        }
+
+        /// <summary>
+        /// Проверка строки на открытые и закрытые скобки.
+        /// </summary>
+        /// <param name="brackets_string"></param>
+        /// <returns></returns>
+        public bool CheckBrackets(string brackets_string)
+        {
+            Dictionary<char, char> pairs = new Dictionary<char, char>()
+            {
+                { '(', ')' },
+            };
+
+            var stack = new Stack<char>();
+            for (int i = 0; i < brackets_string.Length; i++) {
+                if (pairs.ContainsKey(brackets_string[i]) | pairs.ContainsValue(brackets_string[i]))
+                    if (pairs.ContainsKey(brackets_string[i]))
+                        stack.Push(brackets_string[i]);
+                    else {
+                        char stackTopSymbol;
+                        var popResult = stack.TryPop(out stackTopSymbol);
+                        if (popResult == false)
+                            return false;
+
+                        var stackTopSymbolPair = pairs[stackTopSymbol];
+                        if (stackTopSymbolPair != brackets_string[i])
+                            return false;
+                    }
             }
+
+            return stack.Count() == 0;
         }
 
-        public string GetExpression(string input)
+        /// <summary>
+        /// Проверка строки на содержание операций или разделителя.
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckString(string input)
         {
+            for (int i = 0; i < input.Length; i++) 
+            {
+                if (
+                    (
+                        IsDelimeter(input[i]) |
+                        IsOperator(input[i]) |
+                        char.IsDigit(input[i])
+                    ) == false)
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Получить обратную польскую запись операций. 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public string Get(string input)
+        {
+            if (CheckBrackets(input) == false)
+                throw new Exception($"Some trouble with brackets in string: \"{input}\".");
+
+            if (CheckString(input) == false)
+                throw new Exception($"String must contain operator or delimeter symbols. \"{input}\"");
+
             string output = string.Empty; //Строка для хранения выражения
             Stack<char> operStack = new Stack<char>(); //Стек для хранения операторов
 
@@ -97,6 +185,56 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             return output; //Возвращаем выражение в постфиксной записи
         }
 
-        
+        /// <summary>
+        /// Сформировать предикат из строки представляющей обратную польскую запись.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="rpnString"></param>
+        /// <param name="filterParams"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public Expression FormPredicate<T>(string rpnString, List<FilterParam> filterParams, ParameterExpression param)
+        {
+            Expression result = null; //Результат
+            Stack<Expression> temp = new Stack<Expression>(); //Временный стек для решения
+
+            for (int i = 0; i < rpnString.Length; i++) //Для каждого символа в строке
+            {
+                //Если символ - цифра, то читаем все число и записываем на вершину стека
+                if (char.IsDigit(rpnString[i])) {
+                    string stringIndex = string.Empty;
+
+                    while (!IsDelimeter(rpnString[i]) && !IsOperator(rpnString[i])) //Пока не разделитель
+                    {
+                        stringIndex += rpnString[i]; //Добавляем
+                        i++;
+                        if (i == rpnString.Length) break;
+                    }
+
+                    Expression exp = ExpressionBuilder.GetExpression<T>(param, filterParams[int.Parse(stringIndex)]);
+
+                    temp.Push(exp); //Записываем в стек
+                    i--;
+                }
+                else if (IsOperator(rpnString[i])) //Если символ - оператор
+                {
+                    //Берем два последних значения из стека
+                    Expression left = temp.Pop();
+                    Expression right = temp.Pop();
+
+                    switch (rpnString[i]) //И производим над ними действие, согласно оператору
+                    {
+                        case '|':
+                            result = Expression.Or(left, right);
+                            break;
+                        case '&':
+                            result = Expression.And(left, right);
+                            break;
+                    }
+                    temp.Push(result); //Результат вычисления записываем обратно в стек
+                }
+            }
+            return temp.Peek(); //Забираем результат всех вычислений из стека и возвращаем его
+        }
     }
 }
