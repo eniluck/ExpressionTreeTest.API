@@ -80,6 +80,12 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         }
 
 
+        /// <summary>
+        /// Проверить что данное свойство можно фильтровать данным типом.
+        /// </summary>
+        /// <typeparam name="T">Тип.</typeparam>
+        /// <param name="filter">Наименование поля.</param>
+        /// <returns>Результат.</returns>
         public bool CheckTypeByFieldType<T>(FilterParam filter)
         {
             var type = GetPropertyType<T>(filter.FieldName);
@@ -88,7 +94,6 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             if (type == "System.String") 
             {
                 return Enum.IsDefined(typeof(StringFilterType), filterType);
-                
             }
 
             if (type == "System.DateTime") 
@@ -96,11 +101,9 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
                 return Enum.IsDefined(typeof(DateFilterType), filterType);
             }
 
-            if (
-                (type == "System.Decimal") ||
+            if ((type == "System.Decimal") ||
                 (type == "System.Int32") ||
-                (type == "System.Int16")
-            ) 
+                (type == "System.Int16")) 
             {
                 return Enum.IsDefined(typeof(NumberFilterType), filterType);
             }
@@ -108,12 +111,18 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             return false;
         }
 
+        /// <summary>
+        /// Проверить наличие свойства в указанном типе.
+        /// </summary>
+        /// <typeparam name="T">Параметр типа в котором будет происходить поиск свойства.</typeparam>
+        /// <param name="propertyName">Имя свойства для поиска в выбранном типе.</param>
+        /// <returns>Результат проверки наличия свойства в указанном типе.</returns>
         public bool CheckPropertyNameIsExisted<T>(string propertyName)
         {
             return typeof(T).GetProperties().Any(p => p.Name == propertyName);
         }
 
-        private string GetPropertyType<T>(string propertyName)
+        public string GetPropertyType<T>(string propertyName)
         {
             Type registryObjectType = typeof(T);
 
