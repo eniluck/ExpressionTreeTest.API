@@ -87,5 +87,35 @@ namespace ExpressionTreeTest.Tests
 
             Assert.AreEqual(1, 2);
         }
+
+
+        [Test]
+        public void GetAllInformationByParams_FotTest()
+        {
+            var phoneRepository = new PhoneRepository(_phonesContext, null);
+
+            string fieldName = "Name";
+            FilterType filterType = FilterType.NotNull;
+            string fieldValue = null;
+
+            var queryParams = new QueryParams() {
+                FilterParams = new List<FilterParam>()
+                {
+                    new FilterParam() {
+                        FieldName = fieldName,
+                        FilterType = filterType,
+                        FieldValue = fieldValue
+                    }
+                },
+                filterConditions = "0",
+                OrderParams = null,
+                PageNumber = 1,
+                PageSize = 10
+            };
+
+            var result = phoneRepository.GetAllInformationByParams(queryParams).Result;
+
+            Assert.AreEqual(1, 2);
+        }
     }
 }

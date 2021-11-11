@@ -13,7 +13,7 @@
         StartsWith,
         NotStartWith,
         EndsWith,
-        NotEndWith,
+        NotEndsWith,
         GreaterThan,
         GreaterThanOrEqual,
         LessThan,
@@ -53,7 +53,7 @@
         StartsWith = FilterType.StartsWith,
         NotStartWith = FilterType.NotStartWith,
         EndsWith = FilterType.EndsWith,
-        NotEndWith = FilterType.NotEndWith,
+        NotEndWith = FilterType.NotEndsWith,
     }
 
     public enum DateFilterType

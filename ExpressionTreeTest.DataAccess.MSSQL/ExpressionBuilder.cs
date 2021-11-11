@@ -32,9 +32,23 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         {
             MemberExpression member = Expression.Property(param, filter.FieldName);
             
-            //TODO: изменить тип константы в зависимости от типа поля
-            ConstantExpression filterConstant = Expression.Constant(filter.FieldValue);
-            ConstantExpression nullConstant = Expression.Constant(null);
+            ConstantExpression filterConstant= null;
+
+            Type propertyType = GetUnderlyingPropertyType<T>(filter.FieldName);
+            if ( (
+                filter.FilterType == FilterType.Null ||
+                filter.FilterType == FilterType.NotNull) ) 
+            {
+                // var convertedFilterContant = Expression.Convert(filterConstant, propertyType);
+                //filterConstant = convertedFilterContant;
+                //nullConstant = Expression.Constant(null, member.Type);
+
+                // cast member as nullable <member>
+                //member = (MemberExpression)Expression.Convert(member, typeof(int?));
+            } else {
+                filterConstant = GetConstantExpression<T>(filter);
+            }
+            
             ConstantExpression blankStringConstant = Expression.Constant("");
 
             // Проверить что данное свойство можно фильтровать данным типом 
@@ -42,18 +56,35 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
                 throw new Exception("Filter type must be supported by property value.");
             
             switch (filter.FilterType) {
+                case FilterType.Null:
+                    if (Nullable.GetUnderlyingType(member.Type) == null) { 
+                        return Expression.Equal(Expression.Convert(member, GetNullableType(member.Type)), Expression.Constant(null));
+                    }
+                    else
+                        return Expression.Equal(member, Expression.Constant(null));
+                case FilterType.NotNull:
+                    if (Nullable.GetUnderlyingType(member.Type) == null) {
+                        return Expression.NotEqual(Expression.Convert(member, GetNullableType(member.Type)), Expression.Constant(null));
+                    }
+                    else
+                        return Expression.NotEqual(member, Expression.Constant(null));
                 case FilterType.Equals:
-                    return Expression.Equal(member, filterConstant);
+                    if (Nullable.GetUnderlyingType(member.Type) != null) {
+                        return Expression.Equal(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
+                    }
+                    else
+                        return Expression.Equal(member, filterConstant);
                 case FilterType.NotEquals:
-                    return Expression.NotEqual(member, filterConstant);
+                    if (Nullable.GetUnderlyingType(member.Type) != null) {
+                        return Expression.NotEqual(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
+                    }
+                    else
+                        return Expression.NotEqual(member, filterConstant);
+                    
                 case FilterType.Blank:
                     return Expression.Equal(member, blankStringConstant);
                 case FilterType.NotBlank:
                     return Expression.NotEqual(member, blankStringConstant);
-                case FilterType.Null:
-                    return Expression.Equal(member, nullConstant);
-                case FilterType.NotNull:
-                    return Expression.NotEqual(member, nullConstant);
                 case FilterType.Contains:
                     return Expression.Call(member, containsMethod, filterConstant);
                 case FilterType.NotContains:
@@ -66,18 +97,86 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
                                 Expression.Call(member, startsWithMethod, filterConstant));
                 case FilterType.EndsWith:
                     return Expression.Call(member, endsWithMethod, filterConstant);
-                case FilterType.NotEndWith:
+                case FilterType.NotEndsWith:
                     return Expression.Not(
                             Expression.Call(member, endsWithMethod, filterConstant));
                 case FilterType.GreaterThan:
-                    return Expression.GreaterThan(member, filterConstant);
+                    if (Nullable.GetUnderlyingType(member.Type) != null) {
+                        return Expression.GreaterThan(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
+                    }
+                    else
+                        return Expression.GreaterThan(member, filterConstant);
                 case FilterType.GreaterThanOrEqual:
-                    return Expression.GreaterThanOrEqual(member, filterConstant);
+                    if (Nullable.GetUnderlyingType(member.Type) != null) {
+                        return Expression.GreaterThanOrEqual(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
+                    }
+                    else
+                        return Expression.GreaterThanOrEqual(member, filterConstant);
                 case FilterType.LessThan:
-                    return Expression.LessThan(member, filterConstant);
+                    if (Nullable.GetUnderlyingType(member.Type) != null) {
+                        return Expression.LessThan(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
+                    }
+                    else
+                        return Expression.LessThan(member, filterConstant);
                 case FilterType.LessThanOrEqual:
-                    return Expression.LessThanOrEqual(member, filterConstant);
+                    if (Nullable.GetUnderlyingType(member.Type) != null) {
+                        return Expression.LessThanOrEqual(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
+                    }
+                    else
+                        return Expression.LessThanOrEqual(member, filterConstant);
             }
+            return null;
+        }
+
+        // https://stackoverflow.com/questions/108104/how-do-i-convert-a-system-type-to-its-nullable-version
+        private Type GetNullableType(Type type)
+        {
+            // Use Nullable.GetUnderlyingType() to remove the Nullable<T> wrapper if type is already nullable.
+            type = Nullable.GetUnderlyingType(type) ?? type; // avoid type becoming null
+            if (type.IsValueType)
+                return typeof(Nullable<>).MakeGenericType(type);
+            else
+                return type;
+        }
+
+
+        private ConstantExpression GetConstantExpression<T>(FilterParam filter)
+        {
+            var typeString = GetUnderlyingPropertyType<T>(filter.FieldName).ToString();
+            var typeToConvert = GetPropertyType<T>(filter.FieldName);
+
+            if (typeString == "System.String")
+                return Expression.Constant(filter.FieldValue);
+
+            if (typeString == "System.DateTime") 
+            {
+                DateTime value;
+                var result = DateTime.TryParse(filter.FieldValue,out value);
+                if (result == false)
+                    throw new Exception($"Value must be datetime. But was: {filter.FieldValue}");
+               
+                return Expression.Constant(value);
+            }
+            if (typeString == "System.Decimal")
+            {
+                decimal value;
+                var result = decimal.TryParse(filter.FieldValue, out value);
+                if (result == false)
+                    throw new Exception($"Value must be decimal. But was: {filter.FieldValue}");
+                return Expression.Constant(value);
+            }
+
+            if (
+                (typeString == "System.Int32") ||
+                (typeString == "System.Int16")) 
+            {
+                int value;
+                var result = int.TryParse(filter.FieldValue, out value);
+                if (result == false)
+                    throw new Exception($"Value must be integer. But was: {filter.FieldValue}");
+                return Expression.Constant(value);
+            }
+
             return null;
         }
 
@@ -89,24 +188,24 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         /// <returns>Результат.</returns>
         public bool CheckTypeByFieldType<T>(FilterParam filter)
         {
-            var type = GetPropertyType<T>(filter.FieldName);
+            var typeString = GetUnderlyingPropertyType<T>(filter.FieldName).ToString();
             var filterType = filter.FilterType;
 
-            if (type == "System.String") 
+            if (typeString == "System.String") 
             {
                 StringFilterType value = (StringFilterType)filterType;
                 return Enum.IsDefined(typeof(StringFilterType), value);
             }
 
-            if (type == "System.DateTime") 
+            if (typeString == "System.DateTime") 
             {
                 DateFilterType value = (DateFilterType)filterType;
                 return Enum.IsDefined(typeof(DateFilterType), value);
             }
 
-            if ((type == "System.Decimal") ||
-                (type == "System.Int32") ||
-                (type == "System.Int16")) 
+            if ((typeString == "System.Decimal") ||
+                (typeString == "System.Int32") ||
+                (typeString == "System.Int16")) 
             {
                 NumberFilterType value = (NumberFilterType)filterType;
                 return Enum.IsDefined(typeof(NumberFilterType), value);
@@ -126,7 +225,18 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             return typeof(T).GetProperties().Any(p => p.Name == propertyName);
         }
 
-        public string GetPropertyType<T>(string propertyName)
+        public Type GetPropertyType<T>(string propertyName)
+        {
+            Type registryObjectType = typeof(T);
+
+            var registryProperty = registryObjectType.GetProperties().Where(p => p.Name == propertyName).FirstOrDefault();
+
+            // https://stackoverflow.com/questions/8550209/c-sharp-reflection-how-to-get-the-type-of-a-nullableint
+
+            return registryProperty.PropertyType;
+        }
+
+        public Type GetUnderlyingPropertyType<T>(string propertyName)
         {
             Type registryObjectType = typeof(T);
 
@@ -143,7 +253,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
                 propertyType = registryProperty.PropertyType;
             }
 
-            return propertyType.ToString();
+            return propertyType;
         }
     }
 }
