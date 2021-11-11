@@ -79,6 +79,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
             var predicate = new ExpressionBuilder().GetPredicate<PhoneExtendedInformation>(filterParams, filterCondition);
 
             var filteredEntities = phonesJoin.Where(predicate);
+
             return filteredEntities;
         }
     }
