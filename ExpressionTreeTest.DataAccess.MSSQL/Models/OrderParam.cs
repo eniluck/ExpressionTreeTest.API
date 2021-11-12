@@ -8,13 +8,11 @@
         /// <summary>
         /// Имя столбца.
         /// </summary>
-        public string ColumnName { get; set; }
+        public string FieldName { get; set; }
 
         /// <summary>
-        /// Порядок:
-        ///     По возрастанию (0-9):   Asc
-        ///     По убвыванию (9-0)  :   Desc
+        /// Порядок сортировки.
         /// </summary>
-        public string Order { get; set; }
+        public OrderType Order { get; set; }
     }
 }

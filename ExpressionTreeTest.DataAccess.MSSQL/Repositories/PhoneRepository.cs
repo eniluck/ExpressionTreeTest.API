@@ -5,8 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
@@ -15,11 +13,15 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
     {
         private readonly PhonesContext _phonesContext;
         private readonly IMapper _mapper;
+        private ExpressionBuilder _expressionBuilder;
 
         public PhoneRepository(PhonesContext phonesContext, IMapper mapper)
         {
             _phonesContext = phonesContext;
             _mapper = mapper;
+
+            // TODO: Extract interface and add DI
+            _expressionBuilder = new ExpressionBuilder();
         }
 
         public async Task<List<Phone>> GetPhonesAsync()
@@ -34,7 +36,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
 
         public async Task<PhoneExtendedInformationResult> GetAllInformationByParams(QueryParams query)
         {
-            var PhonesJoin =
+            var phonesJoin =
                 from p in _phonesContext.Phones
                 join scf in _phonesContext.SimCardFormats on p.SimCardFormatId equals scf.Id into scfs
                 from p_scf_result in scfs.DefaultIfEmpty()
@@ -48,7 +50,10 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
                     SimCardFormatName = p_scf_result.Name
                 };
 
-            IQueryable<PhoneExtendedInformation> filteredPhones = GetFilteredPhones(PhonesJoin, query.FilterParams, query.filterConditions);
+            //TODO: Перенести в howto / пример использования. var t = _phonesContext.Phones.AsQueryable<Phone>(); 
+
+            var filteredPhones = _expressionBuilder.GetFilteredEntities(phonesJoin, query.FilterParams, query.FilterRule);
+            var orderedPhones = _expressionBuilder.GetOrderedEntities(filteredPhones, query.OrderParams);
 
             //получаем общее количество
             var count = await filteredPhones.CountAsync();
@@ -58,7 +63,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
             var pageSize = query.PageSize;
             var pageCount = Convert.ToInt32(Math.Ceiling(Convert.ToDecimal(count) / Convert.ToDecimal(pageSize)));
 
-            var data = await filteredPhones
+            var data = await orderedPhones
                .Skip((pageNumber - 1) * pageSize)
                .Take(pageSize)
                .ToListAsync();
@@ -72,15 +77,6 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
             };
 
             return result;
-        }
-
-        public IQueryable<PhoneExtendedInformation> GetFilteredPhones(IQueryable<PhoneExtendedInformation> phonesJoin, List<FilterParam> filterParams, string filterCondition)
-        {
-            var predicate = new ExpressionBuilder().GetPredicate<PhoneExtendedInformation>(filterParams, filterCondition);
-
-            var filteredEntities = phonesJoin.Where(predicate);
-
-            return filteredEntities;
         }
     }
 }

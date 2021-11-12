@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -279,5 +280,21 @@ namespace ExpressionTreeTest.Tests
 
             Assert.NotNull(result);
         }
+
+        //TODO: негативные кейсы для _expressionBuilder.GetExpression.
+
+        [Test]
+        public void test()
+        {
+            /*var result = typeof(Queryable).GetMethod("OrderBy", new Type[] { typeof(string) });
+            var result2 = typeof(Queryable).GetMethod("OrderByDescending", new Type[] { typeof(string) });*/
+            var result__1 = typeof(Queryable).GetMethods().Where(method => method.Name == "OrderBy");
+            var result__2 = typeof(Queryable).GetMethods().Where(method => method.Name == "OrderByDescending");
+
+            MethodInfo orderbyMethod = typeof(Queryable).GetMethods().Single(method => method.Name == "OrderBy" && method.GetParameters().Length == 2);
+            MethodInfo orderbyDescendingMethod = typeof(Queryable).GetMethods().Single(method => method.Name == "OrderByDescending" && method.GetParameters().Length == 2);
+            Assert.NotNull(1);
+        }
+        
     }
 }

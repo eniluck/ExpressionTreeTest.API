@@ -11,7 +11,7 @@ namespace ExpressionTreeTest.Tests
         {
             ReversePolishNotation rpn = new ReversePolishNotation();
             string testString = "(1 & 2) | (3 & 4)";
-            string result = rpn.Get(testString);
+            string result = rpn.GetRpnStringRule(testString);
             Assert.AreEqual(result, "1 2 & 3 4 & | ");
         }
 

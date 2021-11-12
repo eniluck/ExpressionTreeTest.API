@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Linq.Expressions;
 using ExpressionTreeTest.DataAccess.MSSQL.Models;
 
@@ -98,7 +96,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         /// <summary>
         /// Проверка строки на содержание операций или разделителя.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Результат проверки.</returns>
         public bool CheckString(string input)
         {
             for (int i = 0; i < input.Length; i++) 
@@ -118,9 +116,9 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         /// <summary>
         /// Получить обратную польскую запись операций. 
         /// </summary>
-        /// <param name="input"></param>
+        /// <param name="input">Строка операций.</param>
         /// <returns></returns>
-        public string Get(string input)
+        public string GetRpnStringRule(string input)
         {
             if (CheckBrackets(input) == false)
                 throw new Exception($"Some trouble with brackets in string: \"{input}\".");
@@ -188,43 +186,42 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         /// <summary>
         /// Сформировать предикат из строки представляющей обратную польскую запись.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="rpnString"></param>
-        /// <param name="filterParams"></param>
-        /// <param name="param"></param>
+        /// <typeparam name="T">Параметр типа.</typeparam>
+        /// <param name="rpnStringRule">Строка в формате обратной польской записи.</param>
+        /// <param name="filterParams">Список параметров фильтрации.</param>
+        /// <param name="expParam">Параметр для дерева выражений.</param>
         /// <returns></returns>
-        public Expression FormPredicate<T>(string rpnString, List<FilterParam> filterParams, ParameterExpression param)
+        public Expression FormWherePredicate<T>(string rpnStringRule, List<FilterParam> filterParams, ParameterExpression expParam)
         {
             Expression result = null; //Результат
             Stack<Expression> temp = new Stack<Expression>(); //Временный стек для решения
-            ExpressionBuilder expressionBuilder = new ExpressionBuilder(); // TODO: DI 
+            ExpressionBuilder _expressionBuilder = new ExpressionBuilder();
 
-
-            for (int i = 0; i < rpnString.Length; i++) //Для каждого символа в строке
+            for (int i = 0; i < rpnStringRule.Length; i++) //Для каждого символа в строке
             {
                 //Если символ - цифра, то читаем все число и записываем на вершину стека
-                if (char.IsDigit(rpnString[i])) {
+                if (char.IsDigit(rpnStringRule[i])) {
                     string stringIndex = string.Empty;
 
-                    while (!IsDelimeter(rpnString[i]) && !IsOperator(rpnString[i])) //Пока не разделитель
+                    while (!IsDelimeter(rpnStringRule[i]) && !IsOperator(rpnStringRule[i])) //Пока не разделитель
                     {
-                        stringIndex += rpnString[i]; //Добавляем
+                        stringIndex += rpnStringRule[i]; //Добавляем
                         i++;
-                        if (i == rpnString.Length) break;
+                        if (i == rpnStringRule.Length) break;
                     }
-
-                    Expression exp = expressionBuilder.GetExpression<T>(param, filterParams[int.Parse(stringIndex)]);
+                    
+                    Expression exp = _expressionBuilder.GetExpression<T>(expParam, filterParams[int.Parse(stringIndex)]);
 
                     temp.Push(exp); //Записываем в стек
                     i--;
                 }
-                else if (IsOperator(rpnString[i])) //Если символ - оператор
+                else if (IsOperator(rpnStringRule[i])) //Если символ - оператор
                 {
                     //Берем два последних значения из стека
                     Expression left = temp.Pop();
                     Expression right = temp.Pop();
 
-                    switch (rpnString[i]) //И производим над ними действие, согласно оператору
+                    switch (rpnStringRule[i]) //И производим над ними действие, согласно оператору
                     {
                         case '|':
                             result = Expression.Or(left, right);

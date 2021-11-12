@@ -20,26 +20,6 @@
         LessThanOrEqual
     }
 
-   /* public enum Stub 
-    {
-        Null = FilterType.Null,
-        NotNull = FilterType.NotNull,
-        Equals = FilterType.Equals,
-        NotEquals = FilterType.NotEquals,
-        Blank = FilterType.Blank,
-        NotBlank = FilterType.NotBlank,
-        Contains = FilterType.Contains,
-        NotContains = FilterType.NotContains,
-        StartsWith = FilterType.StartsWith,
-        NotStartWith = FilterType.NotStartWith,
-        EndsWith = FilterType.EndsWith,
-        NotEndWith = FilterType.NotEndWith,
-        GreaterThan = FilterType.GreaterThan,
-        GreaterThanOrEqual = FilterType.GreaterThanOrEqual,
-        LessThan = FilterType.LessThan,
-        LessThanOrEqual = FilterType.LessThanOrEqual
-    }*/
-
     public enum StringFilterType
     {
         Null = FilterType.Null,

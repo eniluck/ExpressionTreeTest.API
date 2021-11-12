@@ -13,9 +13,9 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Models
         public List<FilterParam> FilterParams { get; set; }
 
         /// <summary>
-        /// Порядок выполенния операций. ( 1 & 2 ) | ( 3 & 4 ) 
+        /// Правило выполенния операций. ( 0 & 1 ) | ( 2 & 3 ) 
         /// </summary>
-        public string filterConditions { get; set; }
+        public string FilterRule { get; set; }
 
         /// <summary>
         /// Список параметров для сортировки запроса.
