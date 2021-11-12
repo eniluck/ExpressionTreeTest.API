@@ -1,4 +1,5 @@
 ﻿using ExpressionTreeTest.DataAccess.MSSQL.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,35 +10,98 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
 {
     public class ExpressionBuilder
     {
-        private static MethodInfo containsMethod = typeof(string).GetMethod("Contains", new Type[] { typeof(string) });
-        private static MethodInfo startsWithMethod = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
-        private static MethodInfo endsWithMethod = typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) });
+        private readonly MethodInfo _containsMethod;
+        private readonly MethodInfo _startsWithMethod;
+        private readonly MethodInfo _endsWithMethod;
 
-        public Expression<Func<T, bool>> GetPredicate<T>(List<FilterParam> filterParams, string filterCondition)
+        private readonly ReversePolishNotation _rpn;
+
+        public ExpressionBuilder()
+        {
+            _rpn = new ReversePolishNotation();
+            _containsMethod = typeof(string).GetMethod("Contains", new Type[] { typeof(string) });
+            _startsWithMethod = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
+            _endsWithMethod = typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) });
+        }
+
+        public IOrderedQueryable<T> GetOrderedEntities<T>(IQueryable<T> entities, List<OrderParam> orderParams)
+        {
+            if (orderParams == null || orderParams.Count == 0)
+                return null;
+
+            IOrderedQueryable<T> orderedEntities = null;
+
+            if (orderParams[0].Order == OrderType.Asc)
+                orderedEntities = entities.OrderBy(p => EF.Property<string>(p, orderParams[0].FieldName));
+            else //if (orderParams[0].Order == "desc")
+                orderedEntities = entities.OrderByDescending(p => EF.Property<string>(p, orderParams[0].FieldName));
+
+            for (int i = 1; i < orderParams.ToArray().Length; i++) {
+                //orderedPhones = orderedPhones.OrderBy(p => EF.Property<string>(p, orderParams[i].FieldName));
+
+                if (orderParams[0].Order == OrderType.Asc)
+                    orderedEntities = orderedEntities.OrderBy(p => EF.Property<string>(p, orderParams[i].FieldName));
+                else //if (orderParams[0].Order == "desc")
+                    orderedEntities = orderedEntities.OrderByDescending(p => EF.Property<string>(p, orderParams[i].FieldName));
+            }
+
+            return orderedEntities;
+        }
+
+        /// <summary>
+        /// Получить отфильтрованные результаты.
+        /// </summary>
+        /// <typeparam name="T">Тип сущности для фильтрации.</typeparam>
+        /// <param name="entities">Набор значений для фильтрации.</param>
+        /// <param name="filterParams">Параметры фильтрации.</param>
+        /// <param name="filterRule">Правило фильтрации.</param>
+        /// <returns></returns>
+        public IQueryable<T> GetFilteredEntities<T>(IQueryable<T> entities, List<FilterParam> filterParams, string filterRule)
+        {
+            var predicate = GetWherePredicate<T>(filterParams, filterRule);
+
+            var filteredEntities = entities.Where(predicate);
+
+            return filteredEntities;
+        }
+
+        /// <summary>
+        /// Получить предикат для операции where.
+        /// </summary>
+        /// <typeparam name="T">Тип сущности.</typeparam>
+        /// <param name="filterParams">Параметры фильтрации.</param>
+        /// <param name="filterRule">Правило фильтрации.</param>
+        /// <returns></returns>
+        public Expression<Func<T, bool>> GetWherePredicate<T>(List<FilterParam> filterParams, string filterRule)
         {
             if (filterParams == null || filterParams.Count == 0)
                 return null;
 
-            ParameterExpression param = Expression.Parameter(typeof(T), "p");
+            ParameterExpression expParam = Expression.Parameter(typeof(T), "p");
 
-            ReversePolishNotation rpn = new ReversePolishNotation();
-            string rpnString = rpn.Get(filterCondition);
+            string rpnStringRule = _rpn.GetRpnStringRule(filterRule);
 
-            Expression exp = rpn.FormPredicate<T>(rpnString, filterParams, param);
+            Expression exp = _rpn.FormWherePredicate<T>(rpnStringRule, filterParams, expParam);
 
-            return Expression.Lambda<Func<T, bool>>(exp, param);
+            return Expression.Lambda<Func<T, bool>>(exp, expParam);
         }
 
-        public Expression GetExpression<T>(ParameterExpression param, FilterParam filter)
+        /// <summary>
+        /// Создать выражение из параметра по фильтру.
+        /// </summary>
+        /// <typeparam name="T">Параметр типа.</typeparam>
+        /// <param name="expParam">Параметр для дерева выражений.</param>
+        /// <param name="filter">Параметр фильтрации.</param>
+        /// <returns>Выражение.</returns>
+        public Expression GetExpression<T>(ParameterExpression expParam, FilterParam filter)
         {
-            MemberExpression member = Expression.Property(param, filter.FieldName);
+            MemberExpression member = Expression.Property(expParam, filter.FieldName);
             
             ConstantExpression filterConstant= null;
 
-            Type propertyType = GetUnderlyingPropertyType<T>(filter.FieldName);
-            if ( (
-                filter.FilterType == FilterType.Null ||
-                filter.FilterType == FilterType.NotNull) ) 
+            //Type propertyType = GetUnderlyingPropertyType<T>(filter.FieldName);
+            if (filter.FilterType == FilterType.Null ||
+                filter.FilterType == FilterType.NotNull) 
             {
                 // var convertedFilterContant = Expression.Convert(filterConstant, propertyType);
                 //filterConstant = convertedFilterContant;
@@ -57,78 +121,74 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             
             switch (filter.FilterType) {
                 case FilterType.Null:
-                    if (Nullable.GetUnderlyingType(member.Type) == null) { 
+                    if (Nullable.GetUnderlyingType(member.Type) == null) 
                         return Expression.Equal(Expression.Convert(member, GetNullableType(member.Type)), Expression.Constant(null));
-                    }
                     else
                         return Expression.Equal(member, Expression.Constant(null));
                 case FilterType.NotNull:
-                    if (Nullable.GetUnderlyingType(member.Type) == null) {
+                    if (Nullable.GetUnderlyingType(member.Type) == null) 
                         return Expression.NotEqual(Expression.Convert(member, GetNullableType(member.Type)), Expression.Constant(null));
-                    }
                     else
                         return Expression.NotEqual(member, Expression.Constant(null));
                 case FilterType.Equals:
-                    if (Nullable.GetUnderlyingType(member.Type) != null) {
+                    if (Nullable.GetUnderlyingType(member.Type) != null) 
                         return Expression.Equal(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
-                    }
                     else
                         return Expression.Equal(member, filterConstant);
                 case FilterType.NotEquals:
-                    if (Nullable.GetUnderlyingType(member.Type) != null) {
+                    if (Nullable.GetUnderlyingType(member.Type) != null) 
                         return Expression.NotEqual(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
-                    }
                     else
                         return Expression.NotEqual(member, filterConstant);
-                    
                 case FilterType.Blank:
                     return Expression.Equal(member, blankStringConstant);
                 case FilterType.NotBlank:
                     return Expression.NotEqual(member, blankStringConstant);
                 case FilterType.Contains:
-                    return Expression.Call(member, containsMethod, filterConstant);
+                    return Expression.Call(member, _containsMethod, filterConstant);
                 case FilterType.NotContains:
                     return Expression.Not(
-                                Expression.Call(member, containsMethod, filterConstant));
+                                Expression.Call(member, _containsMethod, filterConstant));
                 case FilterType.StartsWith:
-                    return Expression.Call(member, startsWithMethod, filterConstant);
+                    return Expression.Call(member, _startsWithMethod, filterConstant);
                 case FilterType.NotStartWith:
                     return Expression.Not(
-                                Expression.Call(member, startsWithMethod, filterConstant));
+                                Expression.Call(member, _startsWithMethod, filterConstant));
                 case FilterType.EndsWith:
-                    return Expression.Call(member, endsWithMethod, filterConstant);
+                    return Expression.Call(member, _endsWithMethod, filterConstant);
                 case FilterType.NotEndsWith:
                     return Expression.Not(
-                            Expression.Call(member, endsWithMethod, filterConstant));
+                            Expression.Call(member, _endsWithMethod, filterConstant));
                 case FilterType.GreaterThan:
-                    if (Nullable.GetUnderlyingType(member.Type) != null) {
+                    if (Nullable.GetUnderlyingType(member.Type) != null)
                         return Expression.GreaterThan(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
-                    }
                     else
                         return Expression.GreaterThan(member, filterConstant);
                 case FilterType.GreaterThanOrEqual:
-                    if (Nullable.GetUnderlyingType(member.Type) != null) {
+                    if (Nullable.GetUnderlyingType(member.Type) != null)
                         return Expression.GreaterThanOrEqual(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
-                    }
                     else
                         return Expression.GreaterThanOrEqual(member, filterConstant);
                 case FilterType.LessThan:
-                    if (Nullable.GetUnderlyingType(member.Type) != null) {
+                    if (Nullable.GetUnderlyingType(member.Type) != null)
                         return Expression.LessThan(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
-                    }
                     else
                         return Expression.LessThan(member, filterConstant);
                 case FilterType.LessThanOrEqual:
-                    if (Nullable.GetUnderlyingType(member.Type) != null) {
+                    if (Nullable.GetUnderlyingType(member.Type) != null)
                         return Expression.LessThanOrEqual(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
-                    }
                     else
                         return Expression.LessThanOrEqual(member, filterConstant);
             }
             return null;
         }
 
-        // https://stackoverflow.com/questions/108104/how-do-i-convert-a-system-type-to-its-nullable-version
+        /// <summary>
+        /// Конвертирует тип в nullable версию этого типа.
+        /// https://stackoverflow.com/questions/108104/how-do-i-convert-a-system-type-to-its-nullable-version
+        /// </summary>
+        /// <param name="type">Тип для конвертации.</param>
+        /// <returns>Nullable тип.</returns>
         private Type GetNullableType(Type type)
         {
             // Use Nullable.GetUnderlyingType() to remove the Nullable<T> wrapper if type is already nullable.
@@ -139,11 +199,9 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
                 return type;
         }
 
-
         private ConstantExpression GetConstantExpression<T>(FilterParam filter)
         {
             var typeString = GetUnderlyingPropertyType<T>(filter.FieldName).ToString();
-            var typeToConvert = GetPropertyType<T>(filter.FieldName);
 
             if (typeString == "System.String")
                 return Expression.Constant(filter.FieldValue);
@@ -223,17 +281,6 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         public bool CheckPropertyNameIsExisted<T>(string propertyName)
         {
             return typeof(T).GetProperties().Any(p => p.Name == propertyName);
-        }
-
-        public Type GetPropertyType<T>(string propertyName)
-        {
-            Type registryObjectType = typeof(T);
-
-            var registryProperty = registryObjectType.GetProperties().Where(p => p.Name == propertyName).FirstOrDefault();
-
-            // https://stackoverflow.com/questions/8550209/c-sharp-reflection-how-to-get-the-type-of-a-nullableint
-
-            return registryProperty.PropertyType;
         }
 
         public Type GetUnderlyingPropertyType<T>(string propertyName)

@@ -42,8 +42,14 @@ namespace ExpressionTreeTest.Tests
                         FieldValue = fieldValue
                     }
                 },
-                filterConditions = "0",
-                OrderParams = null,
+                FilterRule = "0",
+                OrderParams = new List<OrderParam>() 
+                {
+                    new OrderParam() {
+                        FieldName = "ScreenDiagonal",
+                        Order = OrderType.Asc
+                    }
+                },
                 PageNumber = 1,
                 PageSize = 10
             };
@@ -77,7 +83,7 @@ namespace ExpressionTreeTest.Tests
                         FieldValue = "DEXP"
                     }
                 },
-                filterConditions = "0 & (1 | 2)",
+                FilterRule = "0 & (1 | 2)",
                 OrderParams = null,
                 PageNumber = 1,
                 PageSize = 10
@@ -107,7 +113,7 @@ namespace ExpressionTreeTest.Tests
                         FieldValue = fieldValue
                     }
                 },
-                filterConditions = "0",
+                FilterRule = "0",
                 OrderParams = null,
                 PageNumber = 1,
                 PageSize = 10
