@@ -39,7 +39,7 @@ namespace ExpressionTreeTest.Tests
         [TestCase("DecimalField")]
         [TestCase("NullableDecimalField")]
         [TestCase("DateTimeField")]
-        [TestCase("NullableDateField")]
+        [TestCase("NullableDateTimeField")]
         public void CheckPropertyNameIsExisted_ShouldReturnTrue(string fieldName)
         {
             var result = _expressionBuilder.CheckPropertyNameIsExisted<TestClass>(fieldName);
@@ -50,6 +50,7 @@ namespace ExpressionTreeTest.Tests
         [TestCase("")]
         [TestCase("asdf")]
         [TestCase("datefield")]
+        [TestCase(null)]
         public void CheckPropertyNameIsExisted_ShouldReturnFalse(string fieldName)
         {
             var result = _expressionBuilder.CheckPropertyNameIsExisted<TestClass>(fieldName);
@@ -63,7 +64,7 @@ namespace ExpressionTreeTest.Tests
         [TestCase("DecimalField", "System.Decimal")]
         [TestCase("NullableDecimalField", "System.Decimal")]
         [TestCase("DateTimeField", "System.DateTime")]
-        [TestCase("NullableDateField", "System.DateTime")]
+        [TestCase("NullableDateTimeField", "System.DateTime")]
         public void GetPropertyType_shouldReturnString(string fieldName, string typeStringParam)
         {
             var typeString = _expressionBuilder.GetUnderlyingPropertyType<TestClass>(fieldName).ToString();
@@ -80,7 +81,7 @@ namespace ExpressionTreeTest.Tests
                 FilterType = filterType,
                 FieldValue = fieldValue
             };
-            var result = _expressionBuilder.CheckTypeByFieldType<TestClass>(filterParam);
+            var result = _expressionBuilder.CheckFilterByFieldType<TestClass>(filterParam);
 
             Assert.IsTrue(result);
         }
@@ -94,27 +95,10 @@ namespace ExpressionTreeTest.Tests
                 FilterType = filterType,
                 FieldValue = fieldValue
             };
-            var result = _expressionBuilder.CheckTypeByFieldType<TestClass>(filterParam);
+            var result = _expressionBuilder.CheckFilterByFieldType<TestClass>(filterParam);
 
             Assert.IsFalse(result);
         }
-
-
-        /*
-         Null = FilterType.Null,
-        NotNull = FilterType.NotNull,
-        Equals = FilterType.Equals,
-        NotEquals = FilterType.NotEquals,
-        Blank = FilterType.Blank,
-        NotBlank = FilterType.NotBlank,
-
-        Contains = FilterType.Contains,
-        NotContains = FilterType.NotContains,
-        StartsWith = FilterType.StartsWith,
-        NotStartWith = FilterType.NotStartWith,
-        EndsWith = FilterType.EndsWith,
-        NotEndWith = FilterType.NotEndWith,
-         */
 
         [Test]
         [TestCase("StringField", FilterType.Null, null)]
@@ -280,21 +264,5 @@ namespace ExpressionTreeTest.Tests
 
             Assert.NotNull(result);
         }
-
-        //TODO: негативные кейсы для _expressionBuilder.GetExpression.
-
-        [Test]
-        public void test()
-        {
-            /*var result = typeof(Queryable).GetMethod("OrderBy", new Type[] { typeof(string) });
-            var result2 = typeof(Queryable).GetMethod("OrderByDescending", new Type[] { typeof(string) });*/
-            var result__1 = typeof(Queryable).GetMethods().Where(method => method.Name == "OrderBy");
-            var result__2 = typeof(Queryable).GetMethods().Where(method => method.Name == "OrderByDescending");
-
-            MethodInfo orderbyMethod = typeof(Queryable).GetMethods().Single(method => method.Name == "OrderBy" && method.GetParameters().Length == 2);
-            MethodInfo orderbyDescendingMethod = typeof(Queryable).GetMethods().Single(method => method.Name == "OrderByDescending" && method.GetParameters().Length == 2);
-            Assert.NotNull(1);
-        }
-        
     }
 }
