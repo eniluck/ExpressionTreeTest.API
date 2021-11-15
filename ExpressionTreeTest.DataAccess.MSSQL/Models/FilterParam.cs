@@ -33,7 +33,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Models
         ///   заканчивается   :    ends
         ///   не заканчивается:    !ends
         /// </summary>
-        public FilterType FilterType { get; set; }
+        public IFilter FilterType { get; set; }
 
         /// <summary>
         /// Значение фильтра в зависимости от поля ( его типа ).

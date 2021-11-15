@@ -10,18 +10,11 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
 {
     public class ExpressionBuilder
     {
-        private readonly MethodInfo _containsMethod;
-        private readonly MethodInfo _startsWithMethod;
-        private readonly MethodInfo _endsWithMethod;
-
         private readonly ReversePolishNotation _rpn;
 
         public ExpressionBuilder()
         {
             _rpn = new ReversePolishNotation();
-            _containsMethod = typeof(string).GetMethod("Contains", new Type[] { typeof(string) });
-            _startsWithMethod = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
-            _endsWithMethod = typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) });
         }
 
         public IOrderedQueryable<T> GetOrderedEntities<T>(IQueryable<T> entities, List<OrderParam> orderParams)
@@ -99,6 +92,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             
             ConstantExpression filterConstant= null;
 
+            /*
             //Type propertyType = GetUnderlyingPropertyType<T>(filter.FieldName);
             if (filter.FilterType == FilterType.Null ||
                 filter.FilterType == FilterType.NotNull) 
@@ -111,76 +105,15 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
                 //member = (MemberExpression)Expression.Convert(member, typeof(int?));
             } else {
                 filterConstant = GetConstantExpression<T>(filter);
-            }
+            }*/
             
-            ConstantExpression blankStringConstant = Expression.Constant("");
+            //ConstantExpression blankStringConstant = Expression.Constant("");
 
             // Проверить что данное свойство можно фильтровать данным типом 
-            if (CheckFilterByFieldType<T>(filter) == false)
-                throw new Exception("Filter type must be supported by property value.");
-            
-            switch (filter.FilterType) {
-                case FilterType.Null:
-                    if (Nullable.GetUnderlyingType(member.Type) == null) 
-                        return Expression.Equal(Expression.Convert(member, GetNullableType(member.Type)), Expression.Constant(null));
-                    else
-                        return Expression.Equal(member, Expression.Constant(null));
-                case FilterType.NotNull:
-                    if (Nullable.GetUnderlyingType(member.Type) == null) 
-                        return Expression.NotEqual(Expression.Convert(member, GetNullableType(member.Type)), Expression.Constant(null));
-                    else
-                        return Expression.NotEqual(member, Expression.Constant(null));
-                case FilterType.Equals:
-                    if (Nullable.GetUnderlyingType(member.Type) != null) 
-                        return Expression.Equal(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
-                    else
-                        return Expression.Equal(member, filterConstant);
-                case FilterType.NotEquals:
-                    if (Nullable.GetUnderlyingType(member.Type) != null) 
-                        return Expression.NotEqual(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
-                    else
-                        return Expression.NotEqual(member, filterConstant);
-                case FilterType.Blank:
-                    return Expression.Equal(member, blankStringConstant);
-                case FilterType.NotBlank:
-                    return Expression.NotEqual(member, blankStringConstant);
-                case FilterType.Contains:
-                    return Expression.Call(member, _containsMethod, filterConstant);
-                case FilterType.NotContains:
-                    return Expression.Not(
-                                Expression.Call(member, _containsMethod, filterConstant));
-                case FilterType.StartsWith:
-                    return Expression.Call(member, _startsWithMethod, filterConstant);
-                case FilterType.NotStartWith:
-                    return Expression.Not(
-                                Expression.Call(member, _startsWithMethod, filterConstant));
-                case FilterType.EndsWith:
-                    return Expression.Call(member, _endsWithMethod, filterConstant);
-                case FilterType.NotEndsWith:
-                    return Expression.Not(
-                            Expression.Call(member, _endsWithMethod, filterConstant));
-                case FilterType.GreaterThan:
-                    if (Nullable.GetUnderlyingType(member.Type) != null)
-                        return Expression.GreaterThan(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
-                    else
-                        return Expression.GreaterThan(member, filterConstant);
-                case FilterType.GreaterThanOrEqual:
-                    if (Nullable.GetUnderlyingType(member.Type) != null)
-                        return Expression.GreaterThanOrEqual(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
-                    else
-                        return Expression.GreaterThanOrEqual(member, filterConstant);
-                case FilterType.LessThan:
-                    if (Nullable.GetUnderlyingType(member.Type) != null)
-                        return Expression.LessThan(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
-                    else
-                        return Expression.LessThan(member, filterConstant);
-                case FilterType.LessThanOrEqual:
-                    if (Nullable.GetUnderlyingType(member.Type) != null)
-                        return Expression.LessThanOrEqual(member, Expression.Convert(filterConstant, GetNullableType(member.Type)));
-                    else
-                        return Expression.LessThanOrEqual(member, filterConstant);
-            }
-            return null;
+            /*if (CheckFilterByFieldType<T>(filter) == false)
+                throw new Exception("Filter type must be supported by property value.");*/
+
+            return filter.FilterType.GetExpression(member, filterConstant);
         }
 
         /// <summary>
