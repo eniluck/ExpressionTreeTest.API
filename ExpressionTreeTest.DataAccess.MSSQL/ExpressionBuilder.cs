@@ -209,7 +209,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             if (typeString == "System.DateTime") 
             {
                 DateTime value;
-                var result = DateTime.TryParse(filter.FieldValue,out value);
+                var result = DateTime.TryParse(filter.FieldValue, out value);
                 if (result == false)
                     throw new Exception($"Value must be datetime. But was: {filter.FieldValue}");
                
