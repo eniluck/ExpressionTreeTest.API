@@ -6,7 +6,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Types
 {
     public class NotEqualsFilter : FilterBase, IFilter
     {
-        public Expression GetExpression(MemberExpression left, ConstantExpression right, MethodInfo method)
+        public Expression GetExpression(MemberExpression left, ConstantExpression right)
         {
             if (Nullable.GetUnderlyingType(left.Type) != null)
                 return Expression.NotEqual(left, Expression.Convert(right, GetNullableType(left.Type)));

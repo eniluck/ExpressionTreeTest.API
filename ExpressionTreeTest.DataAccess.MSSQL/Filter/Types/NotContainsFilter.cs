@@ -1,13 +1,14 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
+﻿using System;
+using System.Linq.Expressions;
 
 namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Types
 {
     public class NotContainsFilter : FilterBase, IFilter
     {
-        public Expression GetExpression(MemberExpression left, ConstantExpression right, MethodInfo method)
+        public Expression GetExpression(MemberExpression memberExpression, ConstantExpression constantExpression)
         {
-            return Expression.Not(Expression.Call(left, method, right));
+            var containsMethod = typeof(string).GetMethod("Contains", new Type[] { typeof(string) });
+            return Expression.Not(Expression.Call(memberExpression, containsMethod, constantExpression));
         }
     }
 }

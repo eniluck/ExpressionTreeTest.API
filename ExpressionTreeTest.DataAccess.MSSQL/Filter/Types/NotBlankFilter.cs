@@ -5,9 +5,9 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Types
 {
     public class NotBlankFilter : FilterBase, IFilter
     {
-        public Expression GetExpression(MemberExpression left, ConstantExpression right, MethodInfo method)
+        public Expression GetExpression(MemberExpression memberExpression, ConstantExpression constantExpression)
         {
-            return Expression.NotEqual(left, Expression.Constant(""));
+            return Expression.NotEqual(memberExpression, Expression.Constant(""));
         }
     }
 }
