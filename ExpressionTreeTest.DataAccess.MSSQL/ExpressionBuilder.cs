@@ -116,7 +116,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             ConstantExpression blankStringConstant = Expression.Constant("");
 
             // Проверить что данное свойство можно фильтровать данным типом 
-            if (CheckTypeByFieldType<T>(filter) == false)
+            if (CheckFilterByFieldType<T>(filter) == false)
                 throw new Exception("Filter type must be supported by property value.");
             
             switch (filter.FilterType) {
@@ -244,7 +244,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         /// <typeparam name="T">Тип.</typeparam>
         /// <param name="filter">Наименование поля.</param>
         /// <returns>Результат.</returns>
-        public bool CheckTypeByFieldType<T>(FilterParam filter)
+        public bool CheckFilterByFieldType<T>(FilterParam filter)
         {
             var typeString = GetUnderlyingPropertyType<T>(filter.FieldName).ToString();
             var filterType = filter.FilterType;
