@@ -30,8 +30,10 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Filter
         /// <returns></returns>
         private object GetValue(string fieldValue, Type type)
         {
+            if (fieldValue == null)
+                return null;
             //TODO: Переписать.
-            var baseTypeString = type.ToString();
+            var baseTypeString = GetBaseType(type).ToString();
 
             if (baseTypeString == "System.String")
                 return fieldValue;
