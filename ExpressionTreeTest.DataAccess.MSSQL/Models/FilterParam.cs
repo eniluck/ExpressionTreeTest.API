@@ -1,6 +1,8 @@
-﻿using System;
+﻿using ExpressionTreeTest.DataAccess.MSSQL.Filter;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,7 +35,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Models
         ///   заканчивается   :    ends
         ///   не заканчивается:    !ends
         /// </summary>
-        public IFilter FilterType { get; set; }
+        public string FilterType { get; set; }
 
         /// <summary>
         /// Значение фильтра в зависимости от поля ( его типа ).

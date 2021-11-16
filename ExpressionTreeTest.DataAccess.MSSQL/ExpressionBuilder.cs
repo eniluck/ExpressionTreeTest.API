@@ -1,10 +1,10 @@
-﻿using ExpressionTreeTest.DataAccess.MSSQL.Models;
+﻿using ExpressionTreeTest.DataAccess.MSSQL.Filter;
+using ExpressionTreeTest.DataAccess.MSSQL.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace ExpressionTreeTest.DataAccess.MSSQL
 {
@@ -51,7 +51,15 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         /// <returns></returns>
         public IQueryable<T> GetFilteredEntities<T>(IQueryable<T> entities, List<FilterParam> filterParams, string filterRule)
         {
-            var predicate = GetWherePredicate<T>(filterParams, filterRule);
+            List<EntityFilterParam<T>> entityFilterParams = new List<EntityFilterParam<T>>();
+
+            EntityFilterParamBuilder<T> builder = new EntityFilterParamBuilder<T>();
+
+            foreach (var item in filterParams) {
+                entityFilterParams.Add(builder.BuildByFilterParam(item));
+            }
+
+            var predicate = GetWherePredicate<T>(entityFilterParams, filterRule);
 
             var filteredEntities = entities.Where(predicate);
 
@@ -65,7 +73,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         /// <param name="filterParams">Параметры фильтрации.</param>
         /// <param name="filterRule">Правило фильтрации.</param>
         /// <returns></returns>
-        public Expression<Func<T, bool>> GetWherePredicate<T>(List<FilterParam> filterParams, string filterRule)
+        public Expression<Func<T, bool>> GetWherePredicate<T>(List<EntityFilterParam<T>> filterParams, string filterRule)
         {
             if (filterParams == null || filterParams.Count == 0)
                 return null;
@@ -86,12 +94,10 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         /// <param name="expParam">Параметр для дерева выражений.</param>
         /// <param name="filter">Параметр фильтрации.</param>
         /// <returns>Выражение.</returns>
-        public Expression GetExpression<T>(ParameterExpression expParam, FilterParam filter)
+        public Expression GetExpression<T>(ParameterExpression expParam, EntityFilterParam<T> filter)
         {
-            MemberExpression member = Expression.Property(expParam, filter.FieldName);
-            
-            ConstantExpression filterConstant= null;
-
+            MemberExpression member = Expression.Property(expParam, filter.Property.Name);
+  
             /*
             //Type propertyType = GetUnderlyingPropertyType<T>(filter.FieldName);
             if (filter.FilterType == FilterType.Null ||
@@ -106,14 +112,14 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             } else {
                 filterConstant = GetConstantExpression<T>(filter);
             }*/
-            
-            //ConstantExpression blankStringConstant = Expression.Constant("");
+
+
 
             // Проверить что данное свойство можно фильтровать данным типом 
             /*if (CheckFilterByFieldType<T>(filter) == false)
                 throw new Exception("Filter type must be supported by property value.");*/
 
-            return filter.FilterType.GetExpression(member, filterConstant);
+            return filter.FilterType.GetExpression<T>(member, filter);
         }
 
         /// <summary>
@@ -177,7 +183,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         /// <typeparam name="T">Тип.</typeparam>
         /// <param name="filter">Наименование поля.</param>
         /// <returns>Результат.</returns>
-        public bool CheckFilterByFieldType<T>(FilterParam filter)
+        /*public bool CheckFilterByFieldType<T>(FilterParam filter)
         {
             var typeString = GetUnderlyingPropertyType<T>(filter.FieldName).ToString();
             var filterType = filter.FilterType;
@@ -203,7 +209,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             }
 
             return false;
-        }
+        }*/
 
         /// <summary>
         /// Проверить наличие свойства в указанном типе.

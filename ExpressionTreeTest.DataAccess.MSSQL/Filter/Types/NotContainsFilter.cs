@@ -5,10 +5,10 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Types
 {
     public class NotContainsFilter : FilterBase, IFilter
     {
-        public Expression GetExpression(MemberExpression memberExpression, ConstantExpression constantExpression)
+        public Expression GetExpression<T>(MemberExpression memberExpression, EntityFilterParam<T> filter)
         {
             var containsMethod = typeof(string).GetMethod("Contains", new Type[] { typeof(string) });
-            return Expression.Not(Expression.Call(memberExpression, containsMethod, constantExpression));
+            return Expression.Not(Expression.Call(memberExpression, containsMethod, filter.FilterType.GetConstant(filter.FilterValue)));
         }
     }
 }

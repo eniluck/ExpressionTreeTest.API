@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq.Expressions;
 
 namespace ExpressionTreeTest.DataAccess.MSSQL.Filter
 {
@@ -23,6 +24,11 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Filter
         public string GetName()
         {
             return this.GetType().Name.Replace("Filter", "");
+        }
+
+        public ConstantExpression GetConstant(object filterValue)
+        {
+            return Expression.Constant(filterValue);
         }
     }
 }

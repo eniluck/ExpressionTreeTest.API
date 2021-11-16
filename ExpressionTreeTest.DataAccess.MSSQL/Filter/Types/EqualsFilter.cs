@@ -5,12 +5,12 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Types
 {
     public class EqualsFilter : FilterBase, IFilter
     {
-        public Expression GetExpression(MemberExpression left, ConstantExpression constantExpression)
+        public Expression GetExpression<T>(MemberExpression memberExpression, EntityFilterParam<T> filter)
         {
-            if (Nullable.GetUnderlyingType(left.Type) != null)
-                return Expression.Equal(left, Expression.Convert(constantExpression, GetNullableType(left.Type)));
+            if (Nullable.GetUnderlyingType(memberExpression.Type) != null)
+                return Expression.Equal(memberExpression, Expression.Convert(filter.FilterType.GetConstant(filter.FilterValue), GetNullableType(memberExpression.Type)));
             else
-                return Expression.Equal(left, constantExpression);
+                return Expression.Equal(memberExpression, filter.FilterType.GetConstant(filter.FilterValue));
         }
     }
 }

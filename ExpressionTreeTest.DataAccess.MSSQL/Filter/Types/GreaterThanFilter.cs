@@ -5,12 +5,12 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Types
 {
     public class GreaterThanFilter : FilterBase, IFilter
     {
-        public Expression GetExpression(MemberExpression memberExpression, ConstantExpression constantExpression)
+        public Expression GetExpression<T>(MemberExpression memberExpression, EntityFilterParam<T> filter)
         {
             if (Nullable.GetUnderlyingType(memberExpression.Type) != null)
-                return Expression.GreaterThan(memberExpression, Expression.Convert(constantExpression, GetNullableType(memberExpression.Type)));
+                return Expression.GreaterThan(memberExpression, Expression.Convert(filter.FilterType.GetConstant(filter.FilterValue), GetNullableType(memberExpression.Type)));
             else
-                return Expression.GreaterThan(memberExpression, constantExpression);
+                return Expression.GreaterThan(memberExpression, filter.FilterType.GetConstant(filter.FilterValue));
         }
     }
 }

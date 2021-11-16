@@ -5,7 +5,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Types
 {
     public class NotBlankFilter : FilterBase, IFilter
     {
-        public Expression GetExpression(MemberExpression memberExpression, ConstantExpression constantExpression)
+        public Expression GetExpression<T>(MemberExpression memberExpression, EntityFilterParam<T> filter)
         {
             return Expression.NotEqual(memberExpression, Expression.Constant(""));
         }

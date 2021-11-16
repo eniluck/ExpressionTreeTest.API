@@ -1,11 +1,12 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
+﻿using ExpressionTreeTest.DataAccess.MSSQL.Models;
+using System;
+using System.Linq.Expressions;
 
 namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Types
 {
     public class BlankFilter : FilterBase, IFilter
     {
-        public Expression GetExpression(MemberExpression memberExpression, ConstantExpression constantExpression)
+        public Expression GetExpression<T>(MemberExpression memberExpression, EntityFilterParam<T> filter)
         {
             return Expression.Equal(memberExpression, Expression.Constant(""));
         }

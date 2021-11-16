@@ -1,4 +1,5 @@
 ﻿using ExpressionTreeTest.DataAccess.MSSQL;
+using ExpressionTreeTest.DataAccess.MSSQL.Filter;
 using ExpressionTreeTest.DataAccess.MSSQL.Models;
 using NUnit.Framework;
 using System;
@@ -25,11 +26,13 @@ namespace ExpressionTreeTest.Tests
         }
 
         private ExpressionBuilder _expressionBuilder;
+        private EntityFilterParamBuilder<TestClass> _paramBuilder;
 
         [SetUp]
         public void Setup()
         {
             _expressionBuilder = new ExpressionBuilder();
+            _paramBuilder = new EntityFilterParamBuilder<TestClass>();
         }
 
         [Test]
@@ -71,10 +74,10 @@ namespace ExpressionTreeTest.Tests
             Assert.AreEqual(typeString, typeStringParam);
         }
 
-        [Test]
-        [TestCase("StringField", FilterType.NotNull, null)]
-        [TestCase("DateTimeField", FilterType.LessThan, "10.10.2021")]
-        public void CheckTypeByFieldType_shouldReturnTrue(string fieldName, FilterType filterType, string fieldValue)
+        /*[Test]
+        [TestCase("StringField", "!null", null)]
+        [TestCase("DateTimeField", "<", "10.10.2021")]
+        public void CheckTypeByFieldType_shouldReturnTrue(string fieldName, string filterType, string fieldValue)
         {
             var filterParam = new FilterParam() {
                 FieldName = fieldName,
@@ -87,8 +90,8 @@ namespace ExpressionTreeTest.Tests
         }
 
         [Test]
-        [TestCase("StringField", FilterType.LessThan, "10")]
-        public void CheckTypeByFieldType_shouldReturnFalse(string fieldName, FilterType filterType, string fieldValue)
+        [TestCase("StringField", "<", "10")]
+        public void CheckTypeByFieldType_shouldReturnFalse(string fieldName, string filterType, string fieldValue)
         {
             var filterParam = new FilterParam() {
                 FieldName = fieldName,
@@ -98,22 +101,22 @@ namespace ExpressionTreeTest.Tests
             var result = _expressionBuilder.CheckFilterByFieldType<TestClass>(filterParam);
 
             Assert.IsFalse(result);
-        }
+        }*/
 
         [Test]
-        [TestCase("StringField", FilterType.Null, null)]
-        [TestCase("StringField", FilterType.NotNull, null)]
-        [TestCase("StringField", FilterType.Blank, null)]
-        [TestCase("StringField", FilterType.NotBlank, null)]
-        [TestCase("StringField", FilterType.Equals, "test")]
-        [TestCase("StringField", FilterType.NotEquals, "test")]
-        [TestCase("StringField", FilterType.Contains, "test")]
-        [TestCase("StringField", FilterType.NotContains, "test")]
-        [TestCase("StringField", FilterType.StartsWith, "test")]
-        [TestCase("StringField", FilterType.NotStartWith, "test")]
-        [TestCase("StringField", FilterType.EndsWith, "test")]
-        [TestCase("StringField", FilterType.NotEndsWith, "test")]
-        public void GetExpression_typeString_shouldReturnResult(string fieldName, FilterType filterType, string fieldValue)
+        [TestCase("StringField", "null", null)]
+        [TestCase("StringField", "!null", null)]
+        [TestCase("StringField", "blank", null)]
+        [TestCase("StringField", "!blank", null)]
+        [TestCase("StringField", "equals", "test")]
+        [TestCase("StringField", "!equals", "test")]
+        [TestCase("StringField", "contains", "test")]
+        [TestCase("StringField", "!contains", "test")]
+        [TestCase("StringField", "starts", "test")]
+        [TestCase("StringField", "!starts", "test")]
+        [TestCase("StringField", "ends", "test")]
+        [TestCase("StringField", "!ends", "test")]
+        public void GetExpression_typeString_shouldReturnResult(string fieldName, string filterType, string fieldValue)
         {
             ParameterExpression param = Expression.Parameter(typeof(TestClass), "p");
             var filterParam = new FilterParam() {
@@ -122,21 +125,23 @@ namespace ExpressionTreeTest.Tests
                 FieldValue = fieldValue
             };
 
-            var result = _expressionBuilder.GetExpression<TestClass>(param, filterParam);
+            var entityFilterParam = _paramBuilder.BuildByFilterParam(filterParam);
+
+            var result = _expressionBuilder.GetExpression<TestClass>(param, entityFilterParam);
 
             Assert.NotNull(result);
         }
 
         [Test]
-        [TestCase("IntField", FilterType.Null, null)]
-        [TestCase("IntField", FilterType.NotNull, null)]
-        [TestCase("IntField", FilterType.Equals, "1")]
-        [TestCase("IntField", FilterType.NotEquals, "1")]
-        [TestCase("IntField", FilterType.GreaterThan, "1")]
-        [TestCase("IntField", FilterType.GreaterThanOrEqual, "1")]
-        [TestCase("IntField", FilterType.LessThan, "1")]
-        [TestCase("IntField", FilterType.LessThanOrEqual, "1")]
-        public void GetExpression_typeInt_shouldReturnResult(string fieldName, FilterType filterType, string fieldValue)
+        [TestCase("IntField", "null", null)]
+        [TestCase("IntField", "!null", null)]
+        [TestCase("IntField", "blank", "1")]
+        [TestCase("IntField", "!blank", "1")]
+        [TestCase("IntField", ">", "1")]
+        [TestCase("IntField", ">=", "1")]
+        [TestCase("IntField", "<", "1")]
+        [TestCase("IntField", "<=", "1")]
+        public void GetExpression_typeInt_shouldReturnResult(string fieldName, string filterType, string fieldValue)
         {
             ParameterExpression param = Expression.Parameter(typeof(TestClass), "p");
             var filterParam = new FilterParam() {
@@ -145,21 +150,23 @@ namespace ExpressionTreeTest.Tests
                 FieldValue = fieldValue
             };
 
-            var result = _expressionBuilder.GetExpression<TestClass>(param, filterParam);
+            var entityFilterParam = _paramBuilder.BuildByFilterParam(filterParam);
+
+            var result = _expressionBuilder.GetExpression<TestClass>(param, entityFilterParam);
 
             Assert.NotNull(result);
         }
 
         [Test]
-        [TestCase("NullableIntField", FilterType.Null, null)]
-        [TestCase("NullableIntField", FilterType.NotNull, null)]
-        [TestCase("NullableIntField", FilterType.Equals, "1")]
-        [TestCase("NullableIntField", FilterType.NotEquals, "1")]
-        [TestCase("NullableIntField", FilterType.GreaterThan, "1")]
-        [TestCase("NullableIntField", FilterType.GreaterThanOrEqual, "1")]
-        [TestCase("NullableIntField", FilterType.LessThan, "1")]
-        [TestCase("NullableIntField", FilterType.LessThanOrEqual, "1")]
-        public void GetExpression_NullableIntField_shouldReturnResult(string fieldName, FilterType filterType, string fieldValue)
+        [TestCase("NullableIntField", "null", null)]
+        [TestCase("NullableIntField", "!null", null)]
+        [TestCase("NullableIntField", "equals", "1")]
+        [TestCase("NullableIntField", "!equals", "1")]
+        [TestCase("NullableIntField", ">", "1")]
+        [TestCase("NullableIntField", ">=", "1")]
+        [TestCase("NullableIntField", "<", "1")]
+        [TestCase("NullableIntField", "<=", "1")]
+        public void GetExpression_NullableIntField_shouldReturnResult(string fieldName, string filterType, string fieldValue)
         {
             ParameterExpression param = Expression.Parameter(typeof(TestClass), "p");
             var filterParam = new FilterParam() {
@@ -168,21 +175,23 @@ namespace ExpressionTreeTest.Tests
                 FieldValue = fieldValue
             };
 
-            var result = _expressionBuilder.GetExpression<TestClass>(param, filterParam);
+            var entityFilterParam = _paramBuilder.BuildByFilterParam(filterParam);
+
+            var result = _expressionBuilder.GetExpression<TestClass>(param, entityFilterParam);
 
             Assert.NotNull(result);
         }
 
         [Test]
-        [TestCase("DecimalField", FilterType.Null, null)]
-        [TestCase("DecimalField", FilterType.NotNull, null)]
-        [TestCase("DecimalField", FilterType.Equals, "1")]
-        [TestCase("DecimalField", FilterType.NotEquals, "1")]
-        [TestCase("DecimalField", FilterType.GreaterThan, "1")]
-        [TestCase("DecimalField", FilterType.GreaterThanOrEqual, "1")]
-        [TestCase("DecimalField", FilterType.LessThan, "1")]
-        [TestCase("DecimalField", FilterType.LessThanOrEqual, "1")]
-        public void GetExpression_DecimalField_shouldReturnResult(string fieldName, FilterType filterType, string fieldValue)
+        [TestCase("DecimalField", "null", null)]
+        [TestCase("DecimalField", "!null", null)]
+        [TestCase("DecimalField", "equals", "1")]
+        [TestCase("DecimalField", "!equals", "1")]
+        [TestCase("DecimalField", ">", "1")]
+        [TestCase("DecimalField", ">=", "1")]
+        [TestCase("DecimalField", "<", "1")]
+        [TestCase("DecimalField", "<=", "1")]
+        public void GetExpression_DecimalField_shouldReturnResult(string fieldName, string filterType, string fieldValue)
         {
             ParameterExpression param = Expression.Parameter(typeof(TestClass), "p");
             var filterParam = new FilterParam() {
@@ -191,21 +200,23 @@ namespace ExpressionTreeTest.Tests
                 FieldValue = fieldValue
             };
 
-            var result = _expressionBuilder.GetExpression<TestClass>(param, filterParam);
+            var entityFilterParam = _paramBuilder.BuildByFilterParam(filterParam);
+
+            var result = _expressionBuilder.GetExpression<TestClass>(param, entityFilterParam);
 
             Assert.NotNull(result);
         }
 
         [Test]
-        [TestCase("NullableDecimalField", FilterType.Null, null)]
-        [TestCase("NullableDecimalField", FilterType.NotNull, null)]
-        [TestCase("NullableDecimalField", FilterType.Equals, "1")]
-        [TestCase("NullableDecimalField", FilterType.NotEquals, "1")]
-        [TestCase("NullableDecimalField", FilterType.GreaterThan, "1")]
-        [TestCase("NullableDecimalField", FilterType.GreaterThanOrEqual, "1")]
-        [TestCase("NullableDecimalField", FilterType.LessThan, "1")]
-        [TestCase("NullableDecimalField", FilterType.LessThanOrEqual, "1")]
-        public void GetExpression_NullableDecimalField_shouldReturnResult(string fieldName, FilterType filterType, string fieldValue)
+        [TestCase("NullableDecimalField", "null", null)]
+        [TestCase("NullableDecimalField", "!null", null)]
+        [TestCase("NullableDecimalField", "equals", "1")]
+        [TestCase("NullableDecimalField", "!equals", "1")]
+        [TestCase("NullableDecimalField", ">", "1")]
+        [TestCase("NullableDecimalField", ">=", "1")]
+        [TestCase("NullableDecimalField", "<", "1")]
+        [TestCase("NullableDecimalField", "<=", "1")]
+        public void GetExpression_NullableDecimalField_shouldReturnResult(string fieldName, string filterType, string fieldValue)
         {
             ParameterExpression param = Expression.Parameter(typeof(TestClass), "p");
             var filterParam = new FilterParam() {
@@ -214,21 +225,23 @@ namespace ExpressionTreeTest.Tests
                 FieldValue = fieldValue
             };
 
-            var result = _expressionBuilder.GetExpression<TestClass>(param, filterParam);
+            var entityFilterParam = _paramBuilder.BuildByFilterParam(filterParam);
+
+            var result = _expressionBuilder.GetExpression<TestClass>(param, entityFilterParam);
 
             Assert.NotNull(result);
         }
 
         [Test]
-        [TestCase("DateTimeField", FilterType.Null, null)]
-        [TestCase("DateTimeField", FilterType.NotNull, null)]
-        [TestCase("DateTimeField", FilterType.Equals, "01.01.2021")]
-        [TestCase("DateTimeField", FilterType.NotEquals, "01.01.2021")]
-        [TestCase("DateTimeField", FilterType.GreaterThan, "01.01.2021")]
-        [TestCase("DateTimeField", FilterType.GreaterThanOrEqual, "01.01.2021")]
-        [TestCase("DateTimeField", FilterType.LessThan, "01.01.2021")]
-        [TestCase("DateTimeField", FilterType.LessThanOrEqual, "01.01.2021")]
-        public void GetExpression_DateTimeField_shouldReturnResult(string fieldName, FilterType filterType, string fieldValue)
+        [TestCase("DateTimeField", "null", null)]
+        [TestCase("DateTimeField", "!null", null)]
+        [TestCase("DateTimeField", "equals", "01.01.2021")]
+        [TestCase("DateTimeField", "!equals", "01.01.2021")]
+        [TestCase("DateTimeField", ">", "01.01.2021")]
+        [TestCase("DateTimeField", ">", "01.01.2021")]
+        [TestCase("DateTimeField", "<", "01.01.2021")]
+        [TestCase("DateTimeField", "<=", "01.01.2021")]
+        public void GetExpression_DateTimeField_shouldReturnResult(string fieldName, string filterType, string fieldValue)
         {
             ParameterExpression param = Expression.Parameter(typeof(TestClass), "p");
             var filterParam = new FilterParam() {
@@ -237,21 +250,23 @@ namespace ExpressionTreeTest.Tests
                 FieldValue = fieldValue
             };
 
-            var result = _expressionBuilder.GetExpression<TestClass>(param, filterParam);
+            var entityFilterParam = _paramBuilder.BuildByFilterParam(filterParam);
+
+            var result = _expressionBuilder.GetExpression<TestClass>(param, entityFilterParam);
 
             Assert.NotNull(result);
         }
 
         [Test]
-        [TestCase("NullableDateTimeField", FilterType.Null, null)]
-        [TestCase("NullableDateTimeField", FilterType.NotNull, null)]
-        [TestCase("NullableDateTimeField", FilterType.Equals, "01.01.2021")]
-        [TestCase("NullableDateTimeField", FilterType.NotEquals, "01.01.2021")]
-        [TestCase("NullableDateTimeField", FilterType.GreaterThan, "01.01.2021")]
-        [TestCase("NullableDateTimeField", FilterType.GreaterThanOrEqual, "01.01.2021")]
-        [TestCase("NullableDateTimeField", FilterType.LessThan, "01.01.2021")]
-        [TestCase("NullableDateTimeField", FilterType.LessThanOrEqual, "01.01.2021")]
-        public void GetExpression_NullableDateTimeField_shouldReturnResult(string fieldName, FilterType filterType, string fieldValue)
+        [TestCase("NullableDateTimeField", "null", null)]
+        [TestCase("NullableDateTimeField", "!null", null)]
+        [TestCase("NullableDateTimeField", "equals", "01.01.2021")]
+        [TestCase("NullableDateTimeField", "!equals", "01.01.2021")]
+        [TestCase("NullableDateTimeField", ">", "01.01.2021")]
+        [TestCase("NullableDateTimeField", ">", "01.01.2021")]
+        [TestCase("NullableDateTimeField", "<", "01.01.2021")]
+        [TestCase("NullableDateTimeField", "<=", "01.01.2021")]
+        public void GetExpression_NullableDateTimeField_shouldReturnResult(string fieldName, string filterType, string fieldValue)
         {
             ParameterExpression param = Expression.Parameter(typeof(TestClass), "p");
             var filterParam = new FilterParam() {
@@ -260,7 +275,9 @@ namespace ExpressionTreeTest.Tests
                 FieldValue = fieldValue
             };
 
-            var result = _expressionBuilder.GetExpression<TestClass>(param, filterParam);
+            var entityFilterParam = _paramBuilder.BuildByFilterParam(filterParam);
+
+            var result = _expressionBuilder.GetExpression<TestClass>(param, entityFilterParam);
 
             Assert.NotNull(result);
         }

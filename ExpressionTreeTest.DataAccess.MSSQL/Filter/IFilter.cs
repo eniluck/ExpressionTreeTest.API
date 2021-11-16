@@ -5,6 +5,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Filter
     public interface IFilter
     {
         string GetName();
-        Expression GetExpression(MemberExpression memberExpression, ConstantExpression constantExpression);
+        Expression GetExpression<T>(MemberExpression memberExpression, EntityFilterParam<T> filter);
+        ConstantExpression GetConstant(object filterValue);
     }
 }

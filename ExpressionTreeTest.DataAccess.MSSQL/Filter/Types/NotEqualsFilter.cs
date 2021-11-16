@@ -6,12 +6,12 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Types
 {
     public class NotEqualsFilter : FilterBase, IFilter
     {
-        public Expression GetExpression(MemberExpression left, ConstantExpression right)
+        public Expression GetExpression<T>(MemberExpression memberExpression, EntityFilterParam<T> filter)
         {
-            if (Nullable.GetUnderlyingType(left.Type) != null)
-                return Expression.NotEqual(left, Expression.Convert(right, GetNullableType(left.Type)));
+            if (Nullable.GetUnderlyingType(memberExpression.Type) != null)
+                return Expression.NotEqual(memberExpression, Expression.Convert(filter.FilterType.GetConstant(filter.FilterValue), GetNullableType(memberExpression.Type)));
             else
-                return Expression.NotEqual(left, right);
+                return Expression.NotEqual(memberExpression, filter.FilterType.GetConstant(filter.FilterValue));
         }
     }
 }

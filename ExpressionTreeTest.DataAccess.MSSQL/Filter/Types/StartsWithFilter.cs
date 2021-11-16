@@ -5,11 +5,11 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Types
 {
     public class StartsWithFilter : FilterBase, IFilter
     {
-        public Expression GetExpression(MemberExpression memberExpression, ConstantExpression constantExpression)
+        public Expression GetExpression<T>(MemberExpression memberExpression, EntityFilterParam<T> filter)
         {
             var startsWithMethod = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
 
-            return Expression.Call(memberExpression, startsWithMethod, constantExpression);
+            return Expression.Call(memberExpression, startsWithMethod, filter.FilterType.GetConstant(filter.FilterValue));
         }
     }
 }

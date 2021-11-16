@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using ExpressionTreeTest.DataAccess.MSSQL.Filter;
 using ExpressionTreeTest.DataAccess.MSSQL.Models;
 
 namespace ExpressionTreeTest.DataAccess.MSSQL
@@ -191,7 +192,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         /// <param name="filterParams">Список параметров фильтрации.</param>
         /// <param name="expParam">Параметр для дерева выражений.</param>
         /// <returns></returns>
-        public Expression FormWherePredicate<T>(string rpnStringRule, List<FilterParam> filterParams, ParameterExpression expParam)
+        public Expression FormWherePredicate<T>(string rpnStringRule, List<EntityFilterParam<T>> filterParams, ParameterExpression expParam)
         {
             Expression result = null; //Результат
             Stack<Expression> temp = new Stack<Expression>(); //Временный стек для решения

@@ -10,118 +10,118 @@ namespace ExpressionTreeTest.Tests
 {
     public class PhoneRepositoryTest
     {
-        public const string ConnectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=PhonesDB;Integrated Security=True;";
-        public PhonesContext _phonesContext { get; set; }
+        /* public const string ConnectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=PhonesDB;Integrated Security=True;";
+         public PhonesContext _phonesContext { get; set; }
 
-        [SetUp]
-        public void Setup()
-        {
-            // тесты в памяти ?
-            // https://jimmybogard.com/avoid-in-memory-databases-for-tests/
-            var optionsBuilder = new DbContextOptionsBuilder<PhonesContext>();
-            var options = optionsBuilder.UseSqlServer(ConnectionString).Options;
+         [SetUp]
+         public void Setup()
+         {
+             // тесты в памяти ?
+             // https://jimmybogard.com/avoid-in-memory-databases-for-tests/
+             var optionsBuilder = new DbContextOptionsBuilder<PhonesContext>();
+             var options = optionsBuilder.UseSqlServer(ConnectionString).Options;
 
-            _phonesContext = new PhonesContext(options);
-        }
+             _phonesContext = new PhonesContext(options);
+         }
 
-        [Test]
-        public void GetAllInformationByParams_ShouldReturnFilteredResult()
-        {
-            var phoneRepository = new PhoneRepository(_phonesContext, null);
+         [Test]
+         public void GetAllInformationByParams_ShouldReturnFilteredResult()
+         {
+             var phoneRepository = new PhoneRepository(_phonesContext, null);
 
-            string fieldName = "Name";
-            FilterType filterType = FilterType.NotNull;
-            string fieldValue = null;
+             string fieldName = "Name";
+             FilterType filterType = FilterType.NotNull;
+             string fieldValue = null;
 
-            var queryParams = new QueryParams() {
-                FilterParams = new List<FilterParam>()
-                {
-                    new FilterParam() {
-                        FieldName = fieldName,
-                        FilterType = filterType,
-                        FieldValue = fieldValue
-                    }
-                },
-                FilterRule = "0",
-                OrderParams = new List<OrderParam>() 
-                {
-                    new OrderParam() {
-                        FieldName = "ScreenDiagonal",
-                        Order = OrderType.Asc
-                    }
-                },
-                PageNumber = 1,
-                PageSize = 10
-            };
+             var queryParams = new QueryParams() {
+                 FilterParams = new List<FilterParam>()
+                 {
+                     new FilterParam() {
+                         FieldName = fieldName,
+                         FilterType = filterType,
+                         FieldValue = fieldValue
+                     }
+                 },
+                 FilterRule = "0",
+                 OrderParams = new List<OrderParam>() 
+                 {
+                     new OrderParam() {
+                         FieldName = "ScreenDiagonal",
+                         Order = OrderType.Asc
+                     }
+                 },
+                 PageNumber = 1,
+                 PageSize = 10
+             };
 
-            var result = phoneRepository.GetAllInformationByParams(queryParams).Result;
+             var result = phoneRepository.GetAllInformationByParams(queryParams).Result;
 
-            Assert.AreEqual(1, 2);
-        }
+             Assert.AreEqual(1, 2);
+         }
 
-        [Test]
-        public void GetAllInformationByParams_ShouldReturnFilteredResult2()
-        {
-            var phoneRepository = new PhoneRepository(_phonesContext, null);
+         [Test]
+         public void GetAllInformationByParams_ShouldReturnFilteredResult2()
+         {
+             var phoneRepository = new PhoneRepository(_phonesContext, null);
 
-            var queryParams = new QueryParams() {
-                FilterParams = new List<FilterParam>()
-                {
-                    new FilterParam() {
-                        FieldName = "Name",
-                        FilterType = FilterType.NotNull,
-                        FieldValue = null
-                    },
-                    new FilterParam() {
-                        FieldName = "ReleaseYear",
-                        FilterType = FilterType.LessThan,
-                        FieldValue = "2021"
-                    },
-                    new FilterParam() {
-                        FieldName = "Name",
-                        FilterType = FilterType.Contains,
-                        FieldValue = "DEXP"
-                    }
-                },
-                FilterRule = "0 & (1 | 2)",
-                OrderParams = null,
-                PageNumber = 1,
-                PageSize = 10
-            };
+             var queryParams = new QueryParams() {
+                 FilterParams = new List<FilterParam>()
+                 {
+                     new FilterParam() {
+                         FieldName = "Name",
+                         FilterType = FilterType.NotNull,
+                         FieldValue = null
+                     },
+                     new FilterParam() {
+                         FieldName = "ReleaseYear",
+                         FilterType = FilterType.LessThan,
+                         FieldValue = "2021"
+                     },
+                     new FilterParam() {
+                         FieldName = "Name",
+                         FilterType = FilterType.Contains,
+                         FieldValue = "DEXP"
+                     }
+                 },
+                 FilterRule = "0 & (1 | 2)",
+                 OrderParams = null,
+                 PageNumber = 1,
+                 PageSize = 10
+             };
 
-            var result = phoneRepository.GetAllInformationByParams(queryParams).Result;
+             var result = phoneRepository.GetAllInformationByParams(queryParams).Result;
 
-            Assert.AreEqual(1, 2);
-        }
+             Assert.AreEqual(1, 2);
+         }
 
 
-        [Test]
-        public void GetAllInformationByParams_FotTest()
-        {
-            var phoneRepository = new PhoneRepository(_phonesContext, null);
+         [Test]
+         public void GetAllInformationByParams_FotTest()
+         {
+             var phoneRepository = new PhoneRepository(_phonesContext, null);
 
-            string fieldName = "Name";
-            FilterType filterType = FilterType.NotNull;
-            string fieldValue = null;
+             string fieldName = "Name";
+             FilterType filterType = FilterType.NotNull;
+             string fieldValue = null;
 
-            var queryParams = new QueryParams() {
-                FilterParams = new List<FilterParam>()
-                {
-                    new FilterParam() {
-                        FieldName = fieldName,
-                        FilterType = filterType,
-                        FieldValue = fieldValue
-                    }
-                },
-                FilterRule = "0",
-                OrderParams = null,
-                PageNumber = 1,
-                PageSize = 10
-            };
+             var queryParams = new QueryParams() {
+                 FilterParams = new List<FilterParam>()
+                 {
+                     new FilterParam() {
+                         FieldName = fieldName,
+                         FilterType = filterType,
+                         FieldValue = fieldValue
+                     }
+                 },
+                 FilterRule = "0",
+                 OrderParams = null,
+                 PageNumber = 1,
+                 PageSize = 10
+             };
 
-            var result = phoneRepository.GetAllInformationByParams(queryParams).Result;
+             var result = phoneRepository.GetAllInformationByParams(queryParams).Result;
 
-            Assert.AreEqual(1, 2);
-        }
+             Assert.AreEqual(1, 2);
+         }*/
     }
 }
