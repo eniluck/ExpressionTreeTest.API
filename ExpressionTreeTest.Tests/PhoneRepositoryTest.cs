@@ -10,7 +10,7 @@ namespace ExpressionTreeTest.Tests
 {
     public class PhoneRepositoryTest
     {
-        /* public const string ConnectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=PhonesDB;Integrated Security=True;";
+         public const string ConnectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=PhonesDB;Integrated Security=True;";
          public PhonesContext _phonesContext { get; set; }
 
          [SetUp]
@@ -30,7 +30,7 @@ namespace ExpressionTreeTest.Tests
              var phoneRepository = new PhoneRepository(_phonesContext, null);
 
              string fieldName = "Name";
-             FilterType filterType = FilterType.NotNull;
+             string filterType = "!null";
              string fieldValue = null;
 
              var queryParams = new QueryParams() {
@@ -69,17 +69,17 @@ namespace ExpressionTreeTest.Tests
                  {
                      new FilterParam() {
                          FieldName = "Name",
-                         FilterType = FilterType.NotNull,
+                         FilterType = "!null",
                          FieldValue = null
                      },
                      new FilterParam() {
                          FieldName = "ReleaseYear",
-                         FilterType = FilterType.LessThan,
+                         FilterType = "<",
                          FieldValue = "2021"
                      },
                      new FilterParam() {
                          FieldName = "Name",
-                         FilterType = FilterType.Contains,
+                         FilterType = "contains",
                          FieldValue = "DEXP"
                      }
                  },
@@ -101,7 +101,7 @@ namespace ExpressionTreeTest.Tests
              var phoneRepository = new PhoneRepository(_phonesContext, null);
 
              string fieldName = "Name";
-             FilterType filterType = FilterType.NotNull;
+             string filterType = "!null";
              string fieldValue = null;
 
              var queryParams = new QueryParams() {
@@ -122,6 +122,6 @@ namespace ExpressionTreeTest.Tests
              var result = phoneRepository.GetAllInformationByParams(queryParams).Result;
 
              Assert.AreEqual(1, 2);
-         }*/
+         }
     }
 }

@@ -63,20 +63,37 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
             var pageSize = query.PageSize;
             var pageCount = Convert.ToInt32(Math.Ceiling(Convert.ToDecimal(count) / Convert.ToDecimal(pageSize)));
 
-            var data = await orderedPhones
-               .Skip((pageNumber - 1) * pageSize)
-               .Take(pageSize)
-               .ToListAsync();
+            if (query.OrderParams != null) { 
+                var data = await orderedPhones
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
 
-            var result = new PhoneExtendedInformationResult() {
-                Phones = data,
-                Count = count,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                PageCount = pageCount
-            };
+                var result = new PhoneExtendedInformationResult() {
+                    Phones = data,
+                    Count = count,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    PageCount = pageCount
+                };
+                return result;
+            } else {
+                var data = await filteredPhones
+                   .Skip((pageNumber - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
 
-            return result;
+                var result = new PhoneExtendedInformationResult() {
+                    Phones = data,
+                    Count = count,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    PageCount = pageCount
+                };
+                return result;
+            }
+
+            
         }
     }
 }
