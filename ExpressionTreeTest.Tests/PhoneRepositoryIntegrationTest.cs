@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace ExpressionTreeTest.Tests
 {
-    public class PhoneRepositoryTest
+    public class PhoneRepositoryIntegrationTest
     {
          public const string ConnectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=PhonesDB;Integrated Security=True;";
          public PhonesContext _phonesContext { get; set; }

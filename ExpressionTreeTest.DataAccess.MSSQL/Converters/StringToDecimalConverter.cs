@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Converters
+﻿namespace ExpressionTreeTest.DataAccess.MSSQL.Converters
 {
     class StringToDecimalConverter : IStringToTypeConverter
     {
         public object Convert(string value)
         {
-            return value.ChangeType<Decimal>();
+            return value.ChangeType<decimal>();
         }
 
         /*

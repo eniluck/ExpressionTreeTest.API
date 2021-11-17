@@ -1,4 +1,4 @@
-﻿namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Converters
+﻿namespace ExpressionTreeTest.DataAccess.MSSQL.Converters
 {
     public class StringToStringConverter : IStringToTypeConverter
     {

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ExpressionTreeTest.DataAccess.MSSQL.Filter.Converters
+﻿namespace ExpressionTreeTest.DataAccess.MSSQL.Converters
 {
     interface IStringToTypeConverter
     {
