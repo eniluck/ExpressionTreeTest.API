@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace ExpressionTreeTest.DataAccess.MSSQL.Converters
 {
@@ -6,18 +7,16 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Converters
     {
         public object Convert(string value)
         {
-            return value.ChangeType<DateTime>();
+            DateTime convertedValue;
+            var result = DateTime.TryParseExact(value,
+                                           "dd'.'MM'.'yyyy",
+                                           CultureInfo.InvariantCulture,
+                                           DateTimeStyles.None,
+                                           out convertedValue);
+            if (result == false)
+                throw new Exception($"Cannot cast {value} to {typeof(DateTime)}.");
+
+            return convertedValue;
         }
-
-        /*
-         if (baseTypeString == "System.DateTime") {
-                DateTime value;
-                var result = DateTime.TryParse(fieldValue, out value);
-                if (result == false)
-                    throw new Exception($"Value must be datetime. But was: {fieldValue}.");
-
-                return value;
-            }
-         */
     }
 }

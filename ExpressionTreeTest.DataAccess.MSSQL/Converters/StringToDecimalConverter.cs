@@ -1,20 +1,24 @@
-﻿namespace ExpressionTreeTest.DataAccess.MSSQL.Converters
+﻿using System;
+using System.Globalization;
+
+namespace ExpressionTreeTest.DataAccess.MSSQL.Converters
 {
-    class StringToDecimalConverter : IStringToTypeConverter
+    public class StringToDecimalConverter : IStringToTypeConverter
     {
         public object Convert(string value)
         {
-            return value.ChangeType<decimal>();
+            decimal convertedValue;
+
+            NumberStyles style = NumberStyles.AllowDecimalPoint;
+            CultureInfo culture = CultureInfo.InvariantCulture;
+
+            var result = decimal.TryParse(value.Replace(',', '.'), style, culture, out convertedValue);
+            if (result == false)
+                throw new Exception($"Cannot cast {value} to {typeof(decimal)}.");
+
+            return convertedValue;
         }
 
-        /*
-         if (baseTypeString == "System.Decimal") {
-                decimal value;
-                var result = decimal.TryParse(fieldValue, out value);
-                if (result == false)
-                    throw new Exception($"Value must be decimal. But was: {fieldValue}.");
-                return value;
-            }
-         */
+        //return value.ChangeType<decimal>();
     }
 }
