@@ -58,42 +58,32 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
             //получаем общее количество
             var count = await filteredPhones.CountAsync();
 
-            /// Делим на страницы
+            // Делим на страницы
             var pageNumber = query.PageNumber;
             var pageSize = query.PageSize;
             var pageCount = Convert.ToInt32(Math.Ceiling(Convert.ToDecimal(count) / Convert.ToDecimal(pageSize)));
 
+            List<PhoneExtendedInformation> data;
+
             if (query.OrderParams != null) { 
-                var data = await orderedPhones
+                data = await orderedPhones
                    .Skip((pageNumber - 1) * pageSize)
                    .Take(pageSize)
                    .ToListAsync();
-
-                var result = new PhoneExtendedInformationResult() {
-                    Phones = data,
-                    Count = count,
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                    PageCount = pageCount
-                };
-                return result;
             } else {
-                var data = await filteredPhones
+                data = await filteredPhones
                    .Skip((pageNumber - 1) * pageSize)
                    .Take(pageSize)
                    .ToListAsync();
-
-                var result = new PhoneExtendedInformationResult() {
-                    Phones = data,
-                    Count = count,
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                    PageCount = pageCount
-                };
-                return result;
             }
 
-            
+            return new PhoneExtendedInformationResult() {
+                Phones = data,
+                Count = count,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                PageCount = pageCount
+            };
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using ExpressionTreeTest.DataAccess.MSSQL.Filter.Types;
+﻿using ExpressionTreeTest.DataAccess.MSSQL.Filter.Converters;
+using ExpressionTreeTest.DataAccess.MSSQL.Filter.Types;
 using ExpressionTreeTest.DataAccess.MSSQL.Models;
 using System;
 using System.Collections.Generic;
@@ -12,60 +13,36 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Filter
         public EntityFilterParam<T> BuildByFilterParam( FilterParam filterParam)
         {
             EntityFilterParam<T> entityFilterParam = new EntityFilterParam<T>();
+
             entityFilterParam.EntityType = typeof(T);
             entityFilterParam.Property = GetProperty(filterParam.FieldName);
             entityFilterParam.FilterType = GetFilter(filterParam.FilterType);
-
-            if ( !(entityFilterParam.FilterType is NullFilter) || !(entityFilterParam.FilterType is NotNullFilter))
-                entityFilterParam.FilterValue = GetValue(filterParam.FieldValue, entityFilterParam.Property.PropertyType);
+            entityFilterParam.FilterValue = GetValue(filterParam.FieldValue, entityFilterParam.Property.PropertyType);
 
             return entityFilterParam;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="fieldValue"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
+        Dictionary<string, IStringToTypeConverter> stringConverters = new Dictionary<string, IStringToTypeConverter>() {
+            { "System.String", new StringToStringConverter()},
+            { "System.DateTime", new StringToDateTimeConverter()},
+            { "System.Decimal", new StringToDecimalConverter()},
+            { "System.Int32", new StringToIntConverter()},
+            { "System.Int16", new StringToIntConverter()},
+        };
+
         private object GetValue(string fieldValue, Type type)
         {
             if (fieldValue == null)
                 return null;
-            //TODO: Переписать.
+
             var baseTypeString = GetBaseType(type).ToString();
 
-            if (baseTypeString == "System.String")
-                return fieldValue;
+            IStringToTypeConverter converter;
+            var result = stringConverters.TryGetValue(baseTypeString, out converter);
+            if (result == false)
+                throw new Exception($"Converter to type '{baseTypeString}' not found in registered converters.");
 
-            if (baseTypeString == "System.DateTime") {
-                DateTime value;
-                var result = DateTime.TryParse(fieldValue, out value);
-                if (result == false)
-                    throw new Exception($"Value must be datetime. But was: {fieldValue}.");
-
-                return value;
-            }
-
-            if (baseTypeString == "System.Decimal") {
-                decimal value;
-                var result = decimal.TryParse(fieldValue, out value);
-                if (result == false)
-                    throw new Exception($"Value must be decimal. But was: {fieldValue}.");
-                return value;
-            }
-
-            if (
-                (baseTypeString == "System.Int32") ||
-                (baseTypeString == "System.Int16")) {
-                int value;
-                var result = int.TryParse(fieldValue, out value);
-                if (result == false)
-                    throw new Exception($"Value must be integer. But was: {fieldValue}.");
-                return value;
-            }
-
-            throw new Exception($"Not known type: {baseTypeString}.");
+            return converter.Convert(fieldValue);
         }
 
         /// <summary>

@@ -122,7 +122,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             return filter.FilterType.GetExpression<T>(member, filter);
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Конвертирует тип в nullable версию этого типа.
         /// https://stackoverflow.com/questions/108104/how-do-i-convert-a-system-type-to-its-nullable-version
         /// </summary>
@@ -136,9 +136,9 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
                 return typeof(Nullable<>).MakeGenericType(type);
             else
                 return type;
-        }
+        }*/
 
-        private ConstantExpression GetConstantExpression<T>(FilterParam filter)
+        /*private ConstantExpression GetConstantExpression<T>(FilterParam filter)
         {
             var typeString = GetUnderlyingPropertyType<T>(filter.FieldName).ToString();
 
@@ -175,7 +175,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             }
 
             return null;
-        }
+        }*/
 
         /// <summary>
         /// Проверить что данное свойство можно фильтровать данным типом.
@@ -211,7 +211,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             return false;
         }*/
 
-        /// <summary>
+        /*/// <summary>
         /// Проверить наличие свойства в указанном типе.
         /// </summary>
         /// <typeparam name="T">Параметр типа в котором будет происходить поиск свойства.</typeparam>
@@ -220,9 +220,9 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
         public bool CheckPropertyNameIsExisted<T>(string propertyName)
         {
             return typeof(T).GetProperties().Any(p => p.Name == propertyName);
-        }
+        }*/
 
-        public Type GetUnderlyingPropertyType<T>(string propertyName)
+        /*public Type GetUnderlyingPropertyType<T>(string propertyName)
         {
             Type registryObjectType = typeof(T);
 
@@ -240,6 +240,6 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             }
 
             return propertyType;
-        }
+        }*/
     }
 }

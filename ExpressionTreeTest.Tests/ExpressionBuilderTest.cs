@@ -34,7 +34,7 @@ namespace ExpressionTreeTest.Tests
             _expressionBuilder = new ExpressionBuilder();
             _paramBuilder = new EntityFilterParamBuilder<TestClass>();
         }
-
+        /*
         [Test]
         [TestCase("StringField")]
         [TestCase("IntField")]
@@ -72,7 +72,7 @@ namespace ExpressionTreeTest.Tests
         {
             var typeString = _expressionBuilder.GetUnderlyingPropertyType<TestClass>(fieldName).ToString();
             Assert.AreEqual(typeString, typeStringParam);
-        }
+        }*/
 
         /*[Test]
         [TestCase("StringField", "!null", null)]
