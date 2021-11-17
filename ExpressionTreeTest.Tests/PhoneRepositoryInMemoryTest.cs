@@ -1,4 +1,5 @@
 ﻿using ExpressionTreeTest.DataAccess.MSSQL;
+using ExpressionTreeTest.DataAccess.MSSQL.Entities;
 using ExpressionTreeTest.DataAccess.MSSQL.Models;
 using ExpressionTreeTest.DataAccess.MSSQL.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -7,20 +8,36 @@ using System.Collections.Generic;
 
 namespace ExpressionTreeTest.Tests
 {
-    public class PhoneRepositoryIntegrationTest
+    public class PhoneRepositoryInMemoryTest
     {
-        public const string ConnectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=PhonesDB;Integrated Security=True;";
         public PhonesContext _phonesContext { get; set; }
 
-        [SetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
-            // тесты в памяти ?
-            // https://jimmybogard.com/avoid-in-memory-databases-for-tests/
-            var optionsBuilder = new DbContextOptionsBuilder<PhonesContext>();
-            var options = optionsBuilder.UseSqlServer(ConnectionString).Options;
-
+            var options = new DbContextOptionsBuilder<PhonesContext>()
+                .UseInMemoryDatabase(databaseName: "Test")
+                .Options;
+             
             _phonesContext = new PhonesContext(options);
+
+            List<SimCardFormat> simCardFormats = new List<SimCardFormat>() {
+                new SimCardFormat() { Id = 1, Name = "Полноразмерные (1FF)", Height = 85.6m, Width = 53.98m },
+                new SimCardFormat() { Id = 2, Name = "Mini-SIM (2FF)", Height = 25m, Width = 15m },
+                new SimCardFormat() { Id = 3, Name = "Micro-SIM (3FF)", Height = 15m, Width = 12m },
+                new SimCardFormat() { Id = 4, Name = "Nano-SIM (4FF)", Height = 12.3m, Width = 8.8m },
+                new SimCardFormat() { Id = 5, Name = "Встроенные SIM (Embedded-SIM)", Height = 6m, Width = 5m }
+            };
+
+            List<Phone> phones = new List<Phone>() {
+                new Phone {Id=1, Name="DEXP A440", ReleaseYear =2021, SimCardCount = 2, SimCardFormatId =4, Color= "розовый", ScreenDiagonal = 4 },
+                new Phone {Id=2, Name="Samsung Galaxy A72", ReleaseYear =2020, SimCardCount = 1, SimCardFormatId =3, Color= "лаванда", ScreenDiagonal = 6.7m },
+                new Phone {Id=3, Name="POCO X3 Pro", ReleaseYear =2023, SimCardCount = 2, SimCardFormatId =5, Color= "бежевый", ScreenDiagonal = 6.67m },
+                };
+
+            _phonesContext.SimCardFormats.AddRange(simCardFormats);
+            _phonesContext.Phones.AddRange(phones);
+            _phonesContext.SaveChanges();
         }
 
         [Test]
@@ -29,8 +46,8 @@ namespace ExpressionTreeTest.Tests
             var phoneRepository = new PhoneRepository(_phonesContext, null);
 
             string fieldName = "Name";
-            string filterType = "!null";
-            string fieldValue = null;
+            string filterType = "!contains";
+            string fieldValue = "DEXP";
 
             var queryParams = new QueryParams() {
                 FilterParams = new List<FilterParam>()
@@ -67,22 +84,22 @@ namespace ExpressionTreeTest.Tests
                 FilterParams = new List<FilterParam>()
                 {
                      new FilterParam() {
-                         FieldName = "Name",
-                         FilterType = "!null",
-                         FieldValue = null
+                         FieldName = "Color",
+                         FilterType = "equals",
+                         FieldValue = "розовый"
                      },
                      new FilterParam() {
-                         FieldName = "ReleaseYear",
-                         FilterType = "<",
-                         FieldValue = "2021"
+                         FieldName = "Color",
+                         FilterType = "equals",
+                         FieldValue = "лаванда"
                      },
                      new FilterParam() {
-                         FieldName = "Name",
-                         FilterType = "contains",
-                         FieldValue = "DEXP"
+                         FieldName = "ScreenDiagonal",
+                         FilterType = ">",
+                         FieldValue = "6"
                      }
                  },
-                FilterRule = "0 & (1 | 2)",
+                FilterRule = "2 & (0 | 1)",
                 OrderParams = null,
                 PageNumber = 1,
                 PageSize = 10

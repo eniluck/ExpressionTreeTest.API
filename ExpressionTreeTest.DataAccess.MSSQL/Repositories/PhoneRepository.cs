@@ -44,6 +44,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL.Repositories
                     Id = p.Id,
                     Name = p.Name,
                     ReleaseYear = p.ReleaseYear,
+                    Color = p.Color,
                     ScreenDiagonal = p.ScreenDiagonal,
                     SimCardCount = p.SimCardCount,
                     SimCardFormatId = p.SimCardFormatId,

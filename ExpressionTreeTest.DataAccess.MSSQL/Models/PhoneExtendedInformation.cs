@@ -9,5 +9,6 @@
         public int? SimCardCount { get; set; }
         public int? SimCardFormatId { get; set; }
         public string SimCardFormatName { get; set; }
+        public string Color { get; set; }
     }
 }
