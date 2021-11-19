@@ -1,4 +1,4 @@
-﻿namespace ExpressionTreeTest.DataAccess.MSSQL.Models
+﻿namespace ExpressionTreeTest.API.Contracts
 {
     /// <summary>
     /// Параметр сортировки.

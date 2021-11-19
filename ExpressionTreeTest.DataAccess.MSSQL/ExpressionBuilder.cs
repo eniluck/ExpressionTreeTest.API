@@ -24,7 +24,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
 
             IOrderedQueryable<T> orderedEntities = null;
 
-            if (orderParams[0].Order == OrderType.Asc)
+            if (orderParams[0].Order == "asc")
                 orderedEntities = entities.OrderBy(p => EF.Property<string>(p, orderParams[0].FieldName));
             else //if (orderParams[0].Order == "desc")
                 orderedEntities = entities.OrderByDescending(p => EF.Property<string>(p, orderParams[0].FieldName));
@@ -32,7 +32,7 @@ namespace ExpressionTreeTest.DataAccess.MSSQL
             for (int i = 1; i < orderParams.ToArray().Length; i++) {
                 //orderedPhones = orderedPhones.OrderBy(p => EF.Property<string>(p, orderParams[i].FieldName));
 
-                if (orderParams[0].Order == OrderType.Asc)
+                if (orderParams[0].Order == "asc")
                     orderedEntities = orderedEntities.OrderBy(p => EF.Property<string>(p, orderParams[i].FieldName));
                 else //if (orderParams[0].Order == "desc")
                     orderedEntities = orderedEntities.OrderByDescending(p => EF.Property<string>(p, orderParams[i].FieldName));
