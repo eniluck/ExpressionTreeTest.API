@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Phones</title>
+</head>
+<body>
+    <div class="container">
+        <div class="search__form">
+            <div class="search__buttons">
+                <button class="search__button search__button-clear">Очистить поля</button>
+                <button class="search__button search__button-find">Поиск</button>
+            </div>
+            <table class="search__table">
+                <tbody>
+                <tr class="search__row">
+                    <td>
+                        <label class="search__row-label" for="field-name">name</label>
+                    </td>
+                    <td>
+                        <select class="search__row-select">
+                            <option value="notset"></option>
+                            <option value="contains">Содержит</option>
+                            <option value="!contains">Не содержит</option>
+                            <option value="equals">Равно</option>
+                            <option value="!equals">Не равно</option>
+                            <option value="blank">Пустая строка</option>
+                            <option value="!blank">Не пустая строка</option>
+                            <option value="null">null</option>
+                            <option value="!null">Не null</option>
+                            <option value="starts">Начинается</option>
+                            <option value="!starts">Не начинается</option>
+                            <option value="ends">Заканчивается</option>
+                            <option value="!ends">Не заканчивается</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input class="search__row-text" type="text" id="field-name" name="field-name">
+                    </td>
+                </tr>
+            
+                <tr class="search__row">
+                    <td>
+                        <label class="search__row-label" for="field-releaseYear">releaseYear</label>
+                    </td>
+                    <td>
+                        <select class="search__row-select">
+                            <option value="notset"></option>
+                            <option value="contains">Содержит</option>
+                            <option value="!contains">Не содержит</option>
+                            <option value="equals">Равно</option>
+                            <option value="!equals">Не равно</option>
+                            <option value="blank">Пустая строка</option>
+                            <option value="!blank">Не пустая строка</option>
+                            <option value="null">null</option>
+                            <option value="!null">Не null</option>
+                            <option value="starts">Начинается</option>
+                            <option value="!starts">Не начинается</option>
+                            <option value="ends">Заканчивается</option>
+                            <option value="!ends">Не заканчивается</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input class="search__row-text" type="text" id="field-releaseYear" name="field-releaseYear">
+                    </td>
+                </tr>
+            </tbody>
+            </table>
+        </div>
+
+        <div class="phone-data">
+            <div class="data__pages">
+                <span>показать из </span> 
+                <select class="data__pages">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span>записей</span> 
+            </div>
+
+            <table id="data-table" class="data__table">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>name</th>
+                        <th>releaseYear</th>
+                        <th>screenDiagonal</th>
+                        <th>simCardCount</th>
+                        <th>simCardFormatName</th>
+                        <th>color</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="id">2</td>
+                        <td data-label="name">Samsung Galaxy A72</td>
+                        <td data-label="releaseYear">2021</td>
+                        <td data-label="screenDiagonal">6.7</td>
+                        <td data-label="simCardCount">2</td>
+                        <td data-label="simCardFormatName">Nano-SIM (4FF)</td>                                
+                        <td data-label="color">лаванда</td>                
+                    </tr>
+                    <tr>
+                        <td data-label="id">2</td>
+                        <td data-label="name">Samsung Galaxy A72</td>
+                        <td data-label="releaseYear">2021</td>
+                        <td data-label="screenDiagonal">6.7</td>
+                        <td data-label="simCardCount">2</td>
+                        <td data-label="simCardFormatName">Nano-SIM (4FF)</td>                                
+                        <td data-label="color">лаванда</td>                
+                    </tr>
+                </tbody>
+            </table>
+            <div class="phone-data-footer">
+                <div class="footer__data-count">
+                    <span>Показано 2 из 234 записей</span>
+                </div>
+                <div class="footer__data-paginator">
+                    <button class="paginator__prev">Предыдущий</button>
+                    <button class="paginator__page">1</button>
+                    <button class="paginator__page">2</button>
+                    <button class="paginator__page">3</button>
+                    <button class="paginator__page" disabled="disabled">...</button>
+                    <button class="paginator__page">26</button>
+                    <button class="paginator__page">27</button>
+                    <button class="paginator__page">28</button>
+                    <button class="paginator__next">Следующий</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="js/app.js"></script>
+</body>
+</html>
