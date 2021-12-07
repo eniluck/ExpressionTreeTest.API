@@ -7,14 +7,9 @@ export default class ApiInteraction {
         let query = {
             filterParams: [
                 {
-                  fieldName: "screenDiagonal",
+                  fieldName: "ScreenDiagonal",
                   filterType: ">",
                   fieldValue: "6"
-                },
-                {
-                    fieldName: "Name",
-                    filterType: "contains",
-                    fieldValue: "Samsun"
                 }
               ],
               filterRule: "0",

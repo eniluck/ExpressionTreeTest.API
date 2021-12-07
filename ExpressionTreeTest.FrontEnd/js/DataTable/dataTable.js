@@ -3,7 +3,6 @@ export default class DataTable{
         this.table = document.querySelector('#data-table');
         this.initHeader(headers);
         this.initData(data);
-        this.$this = this;
     }
 
     clear() {
@@ -28,7 +27,6 @@ export default class DataTable{
     }
 
     initData(data) {
-        console.log(data);
         this.data = data;
         let new_tbody = document.createElement('tbody');
         
