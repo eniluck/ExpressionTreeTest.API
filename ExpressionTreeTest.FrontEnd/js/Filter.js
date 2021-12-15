@@ -4,6 +4,28 @@ export default class Filter{
         this.available_filters = filters;
     }
 
+    GetNewFilterData(){
+        let filterNameSelect = document.querySelector(".search__row-name");
+        let fieldName = filterNameSelect.value;
+        return fieldName;
+    }
+
+    InitializeFilterNames(){
+        let filterNameSelect = document.querySelector(".search__row-name");
+
+        let i, L = filterNameSelect.options.length - 1;
+        for(i = L; i >= 0; i--) {
+            filterNameSelect.remove(i);
+        }
+
+        this.available_fileds.forEach(el => {
+            var selectOption = document.createElement('option');
+            selectOption.value = el.name;
+            selectOption.innerHTML = el.name;
+            filterNameSelect.appendChild(selectOption);
+        });
+    }
+
     AddRow(fieldName){
         let field = this.available_fileds.find(x => x.name === fieldName);
         //if not found ?

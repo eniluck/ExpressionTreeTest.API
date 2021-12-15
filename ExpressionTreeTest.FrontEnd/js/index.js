@@ -146,7 +146,14 @@ buttonFind.addEventListener('click', ()=>{
 });
 
 let filter = new Filter(fields,filters);
+filter.InitializeFilterNames();
 // добавление нового фильтра
 filter.AddRow("Id");
 
+let buttonAddFilter = document.querySelector('.search__button-add');
+buttonAddFilter.addEventListener('click', ()=> {
+  let filterName = filter.GetNewFilterData();
+  filter.AddRow(filterName);
+});
 // добавить добавление поля фильтра по нажатию кнопки.
+
