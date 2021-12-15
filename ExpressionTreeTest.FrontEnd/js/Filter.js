@@ -79,6 +79,15 @@ export default class Filter{
 
     /*Получить значения из всех полей фильтра*/
     GetFilterValue(){
-
+        let search = document.querySelector('.search__table tbody');
+        //пройти по всем tr для search и по каждому взять имя поля, значение фильтра и значение поля
+        getFieldName
+        let result = [
+            {
+                fieldName: "ID",
+                filterValue: "",
+                fieldValue: ""
+            }
+        ]
     }
 }
