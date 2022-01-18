@@ -1,0 +1,16 @@
+.predicates {
+    display: flex;
+    padding: 2px;
+    background: #C4C4C4;
+    margin-right: 5px;
+}
+
+.predicate-field,
+.predicate-filter {
+    margin-right: 5px;
+}
+
+.predicate-line {
+    display: flex;
+    align-items: center;
+}

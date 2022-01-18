@@ -1,0 +1,22 @@
+.radio-button{
+    position: relative;
+    display: flex;
+}
+
+.radio-button-input {
+    position: absolute;
+    opacity: 0;
+}
+
+.radio-button-label {
+    border: 1px solid;
+    padding: 2px 10px;
+    border-color: #C4C4C4;
+    background-color: #C4C4C4;
+}
+
+.radio-button .radio-button-input:checked+.radio-button-label{
+    color: white;
+    background-color: #226FAA;
+}
+

@@ -1,0 +1,15 @@
+.button-delete {
+    display: flex;
+    background: #C4C4C4;
+    width: 28px;
+    height: 28px;
+}
+
+.button-delete img {
+    width: 20px;
+    margin: auto;
+}
+
+.button-delete:hover {
+    background-color: #D5D5D5;
+}

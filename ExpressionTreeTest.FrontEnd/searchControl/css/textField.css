@@ -1,0 +1,22 @@
+.text-field {
+    background-color: transparent;
+    border: none;
+    width: 100%;
+}
+
+.text-field:hover,
+.text-field:focus{
+    outline: none;
+}
+
+.text-field-container {
+    padding: 5px;
+    border: 1px solid #000000;
+    width: 200px;
+    background-color: #ffffff;
+}
+
+.text-field-container:hover,
+.text-field-container:focus {
+    border-color: #D5D5D5;
+}
